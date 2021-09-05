@@ -353,6 +353,7 @@ Plan
 - for, while, if
 - generics
 - alias support
+- imports
 - alias with generics
 - automatic generic types substitution based on code: let a = KVPair!<> {"a", 1}
 - automatic instance construction type: let a: Array!<KVPair!<>> = [{"a", 1}, {"b", 3}]
