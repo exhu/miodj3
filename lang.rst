@@ -7,16 +7,16 @@ Samples
     # normal procs so that in order to call printf, one needs to write a C wrapper function
     # which unpacks the arguments and translates String into char* etc.
     # but you cannot transform va_list, so cannot use printf etc. functions from Miod
-    @_external { name: "puts" }
-    cproc c_puts(s: String)
+    @_external { name: "c_puts" }
+    cproc puts(s: String)
 
     # varargs don't make sense, since you cannot reconstruct them to modify and pass next,
     # that's why arrays are used.
     # `for` usage example:
     proc fmtstr(fmt: String, args: Array!<Any>)
-        for i, a, is_last in args.iter()
-            "argument N".append(i.str())
-            match a
+        for i in args.iter()
+            "argument N".append(i.index.str())
+            match i.value
                 case Object 
                     "this is object"
                 end_case
@@ -25,6 +25,13 @@ Samples
                     "this is int"
                 end_case
             end_match
+
+            # _is_last:Bool is defined by the `for` from .has_next
+            if _is_last
+                puts(".")
+            else
+                puts(",")
+            end_if
         end_for
 
         while false
@@ -53,15 +60,30 @@ Samples
         mut i: Int
     end_struct
 
-    proc Array!<I>::iter(self): Iterator!<I>
+    struct ArrayItem!<I>
+        index: Int
+        value: I
+    end_struct
+
+
+    proc Array!<I>::iter(self): Iterator!<ArrayItem!<I>>
         let ctx = ArrayIterContext { i: 0 }
         Iterator!<I> {
-            next: closure[ctx, self](): Optional!<I>
+            next: closure[ctx, self](): Optional!<ArrayItem!<I>>
                 let item = self.at(ctx.i)
-                if ctx.i < self.len
+                let i = ctx.i
+                if i < self.len
                     ctx.i += 1
                 end_if
-                item
+                match item 
+                    case value
+                        # automatic generic args
+                        Optional!<>::value { ArrayItem!<> { i, value.value } }
+                    end_case
+                    else
+                        # automatic generic args
+                        Optional!<>::empty
+                end_match
             end_closure
             has_next: closure[ctx, self](): Bool
                 ctx.i < self.len
@@ -197,11 +219,11 @@ Samples
         let a = [1,2,3]
 
         # mutable array has set_value_at(self, value, index)
-        let ma: MutableArray!<> = [1, 2, 3]
+        let ma = MutableArray!<>::from([1, 2, 3])
         ma.set_value_at(5, 1)
         assert(ma.at(1).value_or_fail(), 5)
 
-        let da: DynamicArray!<> = [1, 2, 3]
+        let da = DynamicArray!<>::from([1, 2, 3])
         da.append(5)
     end
 
@@ -214,7 +236,7 @@ Samples
         hash_proc: HashProc!<K>
     end_struct
 
-    struct HashPair!<K, V>
+    struct KvPair!<K, V>
         pub key: K
         pub value: V
     end_struct
@@ -222,16 +244,27 @@ Samples
     proc HashMap!<K, V>::new(hash_proc: HashProc!<K>)
     end
 
-    proc string_hash_map!<V>(): HashMap!<String, V>
+    alias StringHashMap!<V> = HashMap!<String, V>
+
+    proc string_hash_map!<V>(): StringHashMap!<V>
         HashMap!<String, V>::new(closure(item: String): Int
             hash_from_string(item)
         end_closure)
     end
 
-    proc string_hash_map_from!<V>(items: Iterator!<V>): HashMap!<String, V>
+    proc StringHashMap!<V>::new()
+        string_hash_map!<V>()
+    end
+
+    proc string_hash_map_from!<V>(items: Iterator!<KVPair!<String, V>>): HashMap!<String, V>
         let m = string_hash_map!<V>()
         m.insert_all(items)
         m
+    end
+
+    proc hash_map_sample_init()
+        let hm = string_hash_map_from([HashPair!<>{"a", 1}, HashPair!<>{"b", 2}])
+
     end
 
 
