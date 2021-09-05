@@ -113,7 +113,6 @@ Samples
             default
         end_match
     end
-
     enum Days
         working
         holiday
@@ -204,6 +203,35 @@ Samples
 
         let da: DynamicArray!<> = [1, 2, 3]
         da.append(5)
+    end
+
+    # closure to allow some context, like constants/salts etc
+    closure HashProc!<K>(item: K): Int
+
+    struct HashMap!<K, V>
+        pub len: Int
+
+        hash_proc: HashProc!<K>
+    end_struct
+
+    struct HashPair!<K, V>
+        pub key: K
+        pub value: V
+    end_struct
+
+    proc HashMap!<K, V>::new(hash_proc: HashProc!<K>)
+    end
+
+    proc string_hash_map!<V>(): HashMap!<String, V>
+        HashMap!<String, V>::new(closure(item: String): Int
+            hash_from_string(item)
+        end_closure)
+    end
+
+    proc string_hash_map_from!<V>(items: Iterator!<V>)
+        let m = string_hash_map!<V>()
+        m.insert_all(items)
+        m
     end
 
 
