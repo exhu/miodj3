@@ -228,7 +228,7 @@ Samples
         end_closure)
     end
 
-    proc string_hash_map_from!<V>(items: Iterator!<V>)
+    proc string_hash_map_from!<V>(items: Iterator!<V>): HashMap!<String, V>
         let m = string_hash_map!<V>()
         m.insert_all(items)
         m
