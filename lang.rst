@@ -3,6 +3,42 @@ Samples
 
 .. code-block::
 
+    # system tag annotation
+    struct _build_tag
+        pub name: String
+    end_struct
+
+    # access all pub symbols via `std::` prefix
+    import std
+    # access a,b,c, other symbols are inaccessible
+    import std::{a,b,c}
+    # access all pub symbols without `std::`
+    import std::{_}
+
+    # import only if tag "win32" is passed to the compiler
+    @_build_tag { "win32" }
+    import sys::win32
+
+    @_build_tag { "test" }
+    pub proc only_for_test()
+        # proc is compiled only if "test" tag is passed
+    end
+
+    @_build_tag { "ptr32" }
+    alias PtrInt = Int
+
+    @_build_tag { "ptr64" }
+    alias PtrInt = Long
+
+    # type is defined only for "debug" tag
+    @_build_tag { "debug" }
+    struct DebugStruct
+    end_struct
+
+    # make private proc accessible for testing
+    @_build_tag { "test" }
+    pub alias private_made_public = private_proc
+
     # cproc marks a proc as externally defined, all arguments and types are passed as for
     # normal procs so that in order to call printf, one needs to write a C wrapper function
     # which unpacks the arguments and translates String into char* etc.
@@ -97,7 +133,10 @@ Samples
     pub struct Object
         # public mutable field
         pub mut a: Int, set set_a # value type
-        s: String, get(get_s), nostore # reference type
+
+        # field is not allocated, not assigned
+        @_not_stored
+        s: String, get get_s # reference type
 
         # private writable on initialization var
         c: Int
@@ -312,7 +351,6 @@ Plan
 - flags
 - op_eq, deep_eq
 - for, while, if
-- global const for primitive types and strings
 - generics
 - alias support
 - alias with generics
@@ -320,4 +358,6 @@ Plan
 - automatic instance construction type: let a: Array!<KVPair!<>> = [{"a", 1}, {"b", 3}]
 - getters, setters, op_mut
 - reflection & introspection
+
+- global const for primitive types and strings
 - proc_addr (needed only for optimization?)
