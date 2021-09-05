@@ -25,6 +25,9 @@ Samples
                 }
             }
         }
+
+        while false {
+        }
     }
 
     # compiler/hidden runtime implementation
@@ -33,6 +36,8 @@ Samples
 
         data: cpointer
     }
+
+    cprod id(any: Any): PtrInt
 
     # compiler/hidden runtime implementation
     cproc Array!<I>::at(index: Int): Optional!<I>
