@@ -294,3 +294,30 @@ refcounter modifications.
 Fields can have setters, getters
 
 Private fields are accessible only from attached procs (StructName::proc_name).
+
+Plan
+----
+
+- proc
+- call proc
+- cproc
+- let, let mut
+- struct
+- retain, release, weak
+- annotations
+- match
+- enum
+- variant
+- closure
+- flags
+- op_eq, deep_eq
+- for, while, if
+- global const for primitive types and strings
+- generics
+- alias support
+- alias with generics
+- automatic generic types substitution based on code: let a = KVPair!<> {"a", 1}
+- automatic instance construction type: let a: Array!<KVPair!<>> = [{"a", 1}, {"b", 3}]
+- getters, setters, op_mut
+- reflection & introspection
+- proc_addr (needed only for optimization?)
