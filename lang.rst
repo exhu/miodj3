@@ -13,29 +13,30 @@ Samples
     # varargs don't make sense, since you cannot reconstruct them to modify and pass next,
     # that's why arrays are used.
     # `for` usage example:
-    proc fmtstr(fmt: String, args: Array!<Any>) {
-        for i, a, is_last in args.iter() {
+    proc fmtstr(fmt: String, args: Array!<Any>)
+        for i, a, is_last in args.iter()
             "argument N".append(i.str())
-            match a {
-                case Object {
+            match a
+                case Object 
                     "this is object"
-                }
-                case Int {
+                end_case
+                
+                case Int
                     "this is int"
-                }
-            }
-        }
+                end_case
+            end_match
+        end_for
 
-        while false {
-        }
-    }
+        while false
+        end_while
+    end
 
     # compiler/hidden runtime implementation
-    struct Array!<I> {
+    struct Array!<I>
         pub len: Int
 
         data: cpointer
-    }
+    end_struct
 
     cprod id(any: Any): PtrInt
 
@@ -43,134 +44,167 @@ Samples
     cproc Array!<I>::at(index: Int): Optional!<I>
 
     # system-wide iterator structure, used by `for`
-    struct Iterator!<I> {
+    struct Iterator!<I>
         next: closure(): Optional!<I>
         has_next: closure(): Bool
-    }
+    end_struct
 
-    struct ArrayIterContext {
+    struct ArrayIterContext
         mut i: Int
-    }
+    end_struct
 
-    proc Array!<I>::iter(self): Iterator!<I> {
+    proc Array!<I>::iter(self): Iterator!<I>
         let ctx = ArrayIterContext { i: 0 }
         Iterator!<I> {
-            next: closure[ctx, self](): Optional!<I> {
+            next: closure[ctx, self](): Optional!<I>
                 let item = self.at(ctx.i)
-                if ctx.i < self.len {
+                if ctx.i < self.len
                     ctx.i += 1
-                }
+                end_if
                 item
-            }
-            has_next: closure[ctx, self](): Bool {
+            end_closure
+            has_next: closure[ctx, self](): Bool
                 ctx.i < self.len
-            }
+            end_closure
         }
-    }
+    end_proc
     
 
     alias Int = Int32
     # public struct type
-    pub struct Object {
+    pub struct Object
         # public mutable field
         pub mut a: Int, set set_a # value type
         s: String, get(get_s), nostore # reference type
 
         # private writable on initialization var
         c: Int
-    } 
+    end_struct
 
-    proc Object::get_s(self): String {
+    proc Object::get_s(self): String
         "hello"
-    }
+    end
 
-    proc Object::set_a(self, a: Int) {
+    proc Object::set_a(self, a: Int)
         self.a = a
-    }
+    end
 
-    pub variant Optional!<A> {
+    pub variant Optional!<A>
         empty,
         value { value: A }
-    }
+    end_variant
+    
+    proc Optional!<A>::value_or_fail(self): A, panic
+        match self
+            case value
+                self.value
+            end_case
+        else
+            panic("Optional is empty.")
+        end_match
+    end
+    
+    proc Optional!<A>::value_or_default(self, default: A): A
+        match self
+            case value
+                self.value
+            end_case
+        else
+            default
+        end_match
+    end
 
-    enum Days {
+    enum Days
         working
         holiday
-    }
+    end_enum
     
     const global_const = "aaa"
 
-    flags Access {
+    flags Access
         read
         write
-    }
+    end_flags
 
+    # declare proc_addr type titled `Callback`
     pub proc_addr Callback(x: Int): Int
+    # declare closure type name
     pub closure CallbackClosure(): Bool
 
-    proc Object::calc(self) {
+    proc Object::calc(self)
         self.a + self.c
-    }
+    end_proc
 
-    proc Object::new(c: Int): Object {
+    proc Object::new(c: Int): Object
         Object {
             a: 0,
             c: c,
         }
-    }
+    end
 
-    proc Object::_op_equals(self, other: Object): Bool {
+    proc Object::_op_equals(self, other: Object): Bool
         self.a == other.a && self.c == other.c
-    }
+    end
 
-    proc Object::_op_retain(self) {
-    }
+    proc Object::_op_retain(self)
+    end
 
-    proc Object::_op_release(self) {
-    }
+    proc Object::_op_release(self)
+    end
 
-    proc Object::_op_free(self) {
-    }
+    proc Object::_op_free(self)
+    end
 
-    proc Object::_op_mut_field(self, field_name: String) {
-    }
+    proc Object::_op_mut_field(self, field_name: String)
+    end
 
-    proc assignment_test(b: Object, opt: Optional!<Object>, any: Any) {
+    proc assignment_test(b: Object, opt: Optional!<Object>, any: Any)
         let a = b
         # access to b becomes invalid
         b.c
-        match opt {
-            case value {
+        match opt
+            case value
                 # fails, because opt.value is not a variable
                 let c = opt.value
 
                 # correct:
                 let c = retain opt.value
+            end_case
+        end_match
 
-            }
-        }
-
-        match any {
-            case Object {
+        match any
+            case Object
                 any.a = 77
-            }
-        }
-    }
+            end_case
+        end_match
+    end
 
-    proc closure_sample() {
+    proc closure_sample()
         let o = Object::new(3)
         let c = "aaa"
-        let cl =  closure[weak o, c](x: Int): Bool {
-
-        }
-    }
+        let cl =  closure[weak o, c](x: Int): Bool
+            false
+        end_closure
+    end
 
     @_deep_eq
-    struct Deep {
+    struct Deep
         s: String
         o: Object
-    }
+    end_struct
 
+    proc array_sample()
+        # [..,] -- syntactic sugar to construct Array!<> instance
+        let a = [1,2,3]
+
+        # mutable array has set_value_at(self, value, index)
+        let ma: MutableArray!<> = [1, 2, 3]
+        ma.set_value_at(5, 1)
+        assert(ma.at(1).value_or_fail(), 5)
+
+        let da: DynamicArray!<> = [1, 2, 3]
+        da.append(5)
+    end
 
 
 Semantic notes
