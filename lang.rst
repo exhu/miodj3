@@ -3,11 +3,18 @@ Samples
 
 .. code-block::
 
-    # insecure varargs support, primitive types pushed as is, String as cstring
-    cproc printf(fmt: Cstring, args...)
+    # cproc marks a proc as externally defined, all arguments and types are passed as for
+    # normal procs so that in order to call printf, one needs to write a C wrapper function
+    # which unpacks the arguments and translates String into char* etc.
+    # but you cannot transform va_list, so cannot use printf etc. functions from Miod
+    @_external { name: "puts" }
+    cproc c_puts(s: String)
 
-    proc fmtstr(fmt: String, args...) {
-        for i, a, is_last in args {
+    # varargs don't make sense, since you cannot reconstruct them to modify and pass next,
+    # that's why arrays are used.
+    # `for` usage example:
+    proc fmtstr(fmt: String, args: Array!<Any>) {
+        for i, a, is_last in args.iter() {
             "argument N".append(i.str())
             match a {
                 case Object {
@@ -19,6 +26,43 @@ Samples
             }
         }
     }
+
+    # compiler/hidden runtime implementation
+    struct Array!<I> {
+        pub len: Int
+
+        data: cpointer
+    }
+
+    # compiler/hidden runtime implementation
+    cproc Array!<I>::at(index: Int): Optional!<I>
+
+    # system-wide iterator structure, used by `for`
+    struct Iterator!<I> {
+        next: closure(): Optional!<I>
+        has_next: closure(): Bool
+    }
+
+    struct ArrayIterContext {
+        mut i: Int
+    }
+
+    proc Array!<I>::iter(self): Iterator!<I> {
+        let ctx = ArrayIterContext { i: 0 }
+        Iterator!<I> {
+            next: closure[ctx, self](): Optional!<I> {
+                let item = self.at(ctx.i)
+                if ctx.i < self.len {
+                    ctx.i += 1
+                }
+                item
+            }
+            has_next: closure[ctx, self](): Bool {
+                ctx.i < self.len
+            }
+        }
+    }
+    
 
     alias Int = Int32
     # public struct type
@@ -41,7 +85,7 @@ Samples
 
     pub variant Optional!<A> {
         empty,
-        value(value: A)
+        value { value: A }
     }
 
     enum Days {
@@ -111,7 +155,7 @@ Samples
     proc closure_sample() {
         let o = Object::new(3)
         let c = "aaa"
-        let cl =  proc[weak o, c](x: Int): Bool {
+        let cl =  closure[weak o, c](x: Int): Bool {
 
         }
     }
@@ -148,3 +192,5 @@ refcounter modifications.
 '_op_mut_field' proc is called on mutable field being written.
 
 Fields can have setters, getters
+
+Private fields are accessible only from attached procs (StructName::proc_name).
