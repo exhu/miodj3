@@ -3,21 +3,22 @@ Samples
 
 .. code-block::
 
+    # unit names without '_' (underline), must be equal to the filename
+    unit miodsysdef
+
     # system tag annotation
     struct _build_tag
         pub name: String
-    end_struct
+    endstruct
 
     # access all pub symbols via `std::` prefix
     import std
-    # access a,b,c, other symbols are inaccessible
-    import std::{a,b,c}
     # access all pub symbols without `std::`
-    import std::{_}
+    importall std
 
     # import only if tag "win32" is passed to the compiler
     @_build_tag { "win32" }
-    import sys::win32
+    import syswin32
 
     @_build_tag { "test" }
     pub proc only_for_test()
@@ -33,7 +34,7 @@ Samples
     # type is defined only for "debug" tag
     @_build_tag { "debug" }
     struct DebugStruct
-    end_struct
+    endstruct
 
     # make private proc accessible for testing
     @_build_tag { "test" }
@@ -55,23 +56,23 @@ Samples
             match i.value
                 case Object 
                     "this is object"
-                end_case
+                endcase
                 
                 case Int
                     "this is int"
-                end_case
-            end_match
+                endcase
+            endmatch
 
             # _is_last:Bool is defined by the `for` from .has_next
             if _is_last
                 puts(".")
             else
                 puts(",")
-            end_if
-        end_for
+            endif
+        endfor
 
         while false
-        end_while
+        endwhile
     end
 
     # compiler/hidden runtime implementation
@@ -79,7 +80,7 @@ Samples
         pub len: Int
 
         data: cpointer
-    end_struct
+    endstruct
 
     cprod id(any: Any): PtrInt
 
@@ -90,16 +91,16 @@ Samples
     struct Iterator!<I>
         next: closure(): Optional!<I>
         has_next: closure(): Bool
-    end_struct
+    endstruct
 
     struct ArrayIterContext
         mut i: Int
-    end_struct
+    endstruct
 
     struct ArrayItem!<I>
         index: Int
         value: I
-    end_struct
+    endstruct
 
 
     proc Array!<I>::iter(self): Iterator!<ArrayItem!<I>>
@@ -110,22 +111,22 @@ Samples
                 let i = ctx.i
                 if i < self.len
                     ctx.i += 1
-                end_if
+                endif
                 match item 
                     case value
                         # automatic generic args
                         Optional!<>::value { ArrayItem!<> { i, value.value } }
-                    end_case
+                    endcase
                     else
                         # automatic generic args
                         Optional!<>::empty
-                end_match
-            end_closure
+                endmatch
+            endclosure
             has_next: closure[ctx, self](): Bool
                 ctx.i < self.len
-            end_closure
+            endclosure
         }
-    end_proc
+    end
     
 
     alias Int = Int32
@@ -140,7 +141,7 @@ Samples
 
         # private writable on initialization var
         c: Int
-    end_struct
+    endstruct
 
     proc Object::get_s(self): String
         "hello"
@@ -153,38 +154,38 @@ Samples
     pub variant Optional!<A>
         empty,
         value { value: A }
-    end_variant
+    endvariant
     
     proc Optional!<A>::value_or_fail(self): A, panic
         match self
             case value
                 self.value
-            end_case
+            endcase
         else
             panic("Optional is empty.")
-        end_match
+        endmatch
     end
     
     proc Optional!<A>::value_or_default(self, default: A): A
         match self
             case value
                 self.value
-            end_case
+            endcase
         else
             default
-        end_match
+        endmatch
     end
     enum Days
         working
         holiday
-    end_enum
+    endenum
     
     const global_const = "aaa"
 
     flags Access
         read
         write
-    end_flags
+    endflags
 
     # declare proc_addr type titled `Callback`
     pub proc_addr Callback(x: Int): Int
@@ -193,7 +194,7 @@ Samples
 
     proc Object::calc(self)
         self.a + self.c
-    end_proc
+    end
 
     proc Object::new(c: Int): Object
         Object {
@@ -229,14 +230,14 @@ Samples
 
                 # correct:
                 let c = retain opt.value
-            end_case
-        end_match
+            endcase
+        endmatch
 
         match any
             case Object
                 any.a = 77
-            end_case
-        end_match
+            endcase
+        endmatch
     end
 
     proc closure_sample()
@@ -244,14 +245,14 @@ Samples
         let c = "aaa"
         let cl =  closure[weak o, c](x: Int): Bool
             false
-        end_closure
+        endclosure
     end
 
     @_deep_eq
     struct Deep
         s: String
         o: Object
-    end_struct
+    endstruct
 
     proc array_sample()
         # [..,] -- syntactic sugar to construct Array!<> instance
@@ -273,12 +274,12 @@ Samples
         pub len: Int
 
         hash_proc: HashProc!<K>
-    end_struct
+    endstruct
 
     struct KvPair!<K, V>
         pub key: K
         pub value: V
-    end_struct
+    endstruct
 
     proc HashMap!<K, V>::new(hash_proc: HashProc!<K>)
     end
@@ -288,7 +289,7 @@ Samples
     proc string_hash_map!<V>(): StringHashMap!<V>
         HashMap!<String, V>::new(closure(item: String): Int
             hash_from_string(item)
-        end_closure)
+        endclosure)
     end
 
     proc StringHashMap!<V>::new()
@@ -340,7 +341,7 @@ Plan
 - proc
 - call proc
 - cproc
-- let, let mut
+- let, var
 - struct
 - retain, release, weak
 - annotations
