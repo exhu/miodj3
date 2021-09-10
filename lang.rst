@@ -3,8 +3,7 @@ Samples
 
 .. code-block::
 
-    # unit names without '_' (underline), must be equal to the filename
-    unit miodsysdef
+    unit miod_sys_def
 
     # system tag annotation
     struct _build_tag

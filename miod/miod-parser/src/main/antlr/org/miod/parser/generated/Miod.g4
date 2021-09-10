@@ -59,13 +59,14 @@ WS: (' ' | '\t')+ -> skip;
 UNIT: 'unit';
 CONST: 'const';
 PUBLIC: 'pub';
-
+MUT: 'mut';
 LET: 'let';
 VAR: 'var';
 PROC: 'proc';
 CPROC: 'cproc';
 END_PROC: 'end';
 IMPORT: 'import';
+IMPORT_ALL: 'importall';
 IF: 'if';
 THEN: 'then';
 ELSE: 'else';
