@@ -80,6 +80,7 @@ WS: (' ' | '\t')+ -> skip;
 
 // keywords
 UNIT: 'unit';
+IS: 'is';
 PANIC: 'panic';
 CONST: 'const';
 PUBLIC: 'pub';
@@ -145,6 +146,7 @@ END_ENUM: 'endenum';
 FLAGS: 'flags';
 END_FLAGS: 'endflags';
 WEAK: 'weak';
+WEAK_MONITOR: 'weak_monitor';
 SETTER: 'setter';
 GETTER: 'getter';
 // Map$<String, Integer> -- integer map generic type

@@ -31,6 +31,40 @@ Samples
     @_panic
     proc panic(msg: String)
 
+    # to annotate structs for which to generate introspection/reflection data
+    struct _reflection
+    endstruct
+
+    struct EnumType
+        values: Array!<Any>
+        from_string: closure(valueName: String): Any
+        to_string: closure(value: Any): Any
+    endstruct
+
+    enum FieldTypeKind
+        integer
+        long
+        float
+        double
+        string
+        enum_type
+        variant_type
+        struct_type
+        flags_type
+    endenum
+
+    struct FieldType
+        pub name: String
+        pub kind: FieldTypeKind
+    endstruct
+    
+    struct FieldInfo
+        pub name: String
+        pub type: FieldType
+        pub set_value: closure(instance: Any, value: Any)
+        pub get_value: closure(instance: Any): Any
+    endstruct
+
     # instanciating this type generates a compilation error
     @_builtin
     struct Any
@@ -90,7 +124,7 @@ Samples
         # can panic
         for i in args.iter()
             "argument N".append(i.index.str())
-            match i.value
+            match retain i.value
                 case Object 
                     "this is object"
                 endcase
@@ -110,7 +144,7 @@ Samples
 
         # equivalent to the upper
         while let it = args.iter(); it.has_next()
-            let i = match it.next().value_or_panic().value
+            let i = match retain it.next().value_or_panic().value
                         case v: Int
                             v
                         else
@@ -159,7 +193,7 @@ Samples
                 match item 
                     case value
                         # automatic generic args
-                        Optional!<>::value { ArrayItem!<> { i, value.value } }
+                        Optional!<>::value { ArrayItem!<> { i, retain value.value } }
                     endcase
                     else
                         # automatic generic args
@@ -177,11 +211,11 @@ Samples
     # public struct type
     pub struct Object
         # public mutable field
-        pub mut a: Int, set set_a # value type
+        pub mut a: Int, setter set_a # value type
 
         # field is not allocated, not assigned
         @_not_stored
-        s: String, get get_s # reference type
+        s: String, getter get_s # reference type
 
         # private writable on initialization var
         c: Int
@@ -204,7 +238,7 @@ Samples
     proc Optional!<A>::value_or_panic(self): A
         match self
             case value
-                self.value
+                retain self.value
             endcase
         else
             panic("Optional is empty.")
@@ -214,7 +248,7 @@ Samples
     proc Optional!<A>::value_or_default(self, default: A): A
         match self
             case value
-                self.value
+                retain self.value
             endcase
         else
             default
@@ -365,13 +399,18 @@ cache etc.
 Primitive types are numeric 8..64 bit integers, floats, boolean, flags, enums, they are copied on
 assignment, boxed/unboxed automatically in generics. 'retain', 'weak' keywords generate error on them.
 
-Operator '==' calls '_op_equals', if it's defined or compares hidden pointer value otherwise.
-@_deep_eq annotation implements deep comparison instead.
+Discarded the idea for now: Operator '==' calls '_op_equals', if it's defined or compares hidden
+pointer value otherwise.  @_deep_eq annotation implements deep comparison instead.
+
+Comparison operators are available only for numeric types. For comparing hidden pointer values
+use operator 'is'. To compare string values there're procedures 'equals', 'compare'.
 
 Identifier names with starting '_' are reserved.
 
 Assignment operator '=' moves pointer, invalidates source pointer if 'retain' keyword is not used,
 copies primitive types.
+
+Instance is retained on assignment, on passing as proc argument, closure capture.
 
 '_op_retain', '_op_release', '_op_free' procedures when defined can add logic triggered on
 refcounter modifications.
@@ -381,6 +420,7 @@ refcounter modifications.
 Fields can have setters, getters
 
 Private fields are accessible only from attached procs (StructName::proc_name).
+
 
 
 Generics
@@ -407,7 +447,7 @@ So when converting from an Any instance only the Any type is used for all the ge
             // now available iter function but as if declared as
             // returning Iterator!<ArrayItem!<Any>>
             for item in my_any.iter()
-                let result = match item.value
+                let result = retain match item.value
                     case Int
                         item.value > 1
                     endcase
@@ -417,6 +457,7 @@ So when converting from an Any instance only the Any type is used for all the ge
             endfor
         endcase
     endmatch
+
 
 
 Plan
