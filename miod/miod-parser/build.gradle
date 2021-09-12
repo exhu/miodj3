@@ -45,3 +45,7 @@ dependencies {
 generateGrammarSource {
     arguments += ["-long-messages", "-package", "org.miod.parser.generated"]
 }
+
+compileKotlin {
+    dependsOn(generateGrammarSource)
+}

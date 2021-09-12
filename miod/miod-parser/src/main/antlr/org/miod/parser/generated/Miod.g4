@@ -2,21 +2,28 @@ grammar Miod;
 
 compUnit: comments? unitHeader unitBody EOF;
 
-unitHeader: docs? unit NEWLINE;
+unitHeader: unitDocs? unit NEWLINE imports?;
 
-unit: UNIT ID;
+unitDocs: docs;
+
+unit: UNIT unitName=ID;
 
 comments: COMMENT+;
 docs: DOC_COMMENT+;
 
 unitBody: globalStatements?;
 
+imports: importDecl+;
+importDecl: importUnit | importAllFromUnit;
+
 // IMPORT imports units, so that public symbols can be addressed as myunit.procName
+importUnit: IMPORT unitName=ID NEWLINE;
+
 // IMPORT_ALL imports unit public symbols into global namespace
-importDecl: IMPORT path=STRING;
+importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;
 
 globalStmt:
-    constDecl NEWLINE
+    constDecl
     | comments
     | NEWLINE
     ;
@@ -25,16 +32,32 @@ globalStatements: globalStmt+;
 
 boolExpr: TRUE | FALSE;
 
-constDecl: docs? PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIGN NEWLINE? expr;
+constDecl: docs? annotations? PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIGN NEWLINE? literal NEWLINE;
 
-expr: literal
-    | ID;
+annotations: annotation+;
+
+annotation: ANNOTATE name=ID structInitLiteralNoExpr? NEWLINE;
+
+// no expressions in initialization
+structInitLiteralNoExpr: OPEN_CURLY NEWLINE?
+    initNamedMembersNoExpr | initAnonymousMembersNoExpr
+    CLOSE_CURLY;
+
+initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA initNamedMemberNoExpr)*;
+initNamedMemberNoExpr: ID COLON literal;
+
+initAnonymousMembersNoExpr: initAnonymousMemberNoExpr (COMMA initAnonymousMemberNoExpr)*;
+initAnonymousMemberNoExpr: literal;
+
 
 literal: STRING | INTEGER | FLOAT;
 
 argDecl: OPEN_PAREN CLOSE_PAREN;
 
 typeSpec: ID;
+
+expr: literal
+    | ID;
 
 procBody: ;
 
@@ -51,9 +74,6 @@ COMMENT: '#' .*? NL;
 
 //
 WS: (' ' | '\t')+ -> skip;
-
-//JOIN_LINE: '\\' NEWLINE -> skip;
-
 
 // keywords
 UNIT: 'unit';

@@ -372,7 +372,7 @@ So when converting from an Any instance only the Any type is used for all the ge
         case Array!<Int>
             // error, will not compile!
         endcase
-        case Array!<Any>
+        case Array
             // now available iter function but as if declared as
             // returning Iterator!<ArrayItem!<Any>>
             for item in my_any.iter()
@@ -385,7 +385,6 @@ So when converting from an Any instance only the Any type is used for all the ge
                 endmatch
             endfor
         endcase
-
     endmatch
 
 
@@ -404,16 +403,17 @@ Plan
 - variant
 - closure
 - flags
-- op_eq, deep_eq
 - for, while, if
-- generics
 - alias support
 - imports
+- global const for primitive types and strings
+- generics
 - alias with generics
 - automatic generic types substitution based on code: let a = KVPair!<> {"a", 1}
 - automatic instance construction type: let a: Array!<KVPair!<>> = [{"a", 1}, {"b", 3}]
 - getters, setters, op_mut
 - reflection & introspection
-
-- global const for primitive types and strings
 - proc_addr (needed only for optimization?)
+- _op_retain, _op_release, _op_free
+- _op_mut_field
+- _op_eq, deep_eq
