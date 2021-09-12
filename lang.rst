@@ -1,9 +1,26 @@
+`Samples`_
+
+`Semantic notes`_
+
+`Generics`_
+
+`Plan`_
+
+
 Samples
 -------
 
 .. code-block::
 
     unit miod_sys_def
+
+    @_builtin
+    struct Any
+    endstruct
+
+    @_builtin
+    struct Int
+    endstruct
 
     # system tag annotation
     struct _build_tag
@@ -333,6 +350,44 @@ refcounter modifications.
 Fields can have setters, getters
 
 Private fields are accessible only from attached procs (StructName::proc_name).
+
+
+Generics
+--------
+
+At the first iteration of the language, generics are implemented as syntactic sugar only. An instance
+of a generic structure does not have information on the actual types it was constructed for.
+Otherwise every instance would have to store that information, which includes not only the types used
+for the structure but the inner types as well, e.g. an array of generic arrays: Array!<Array!<Int>>...
+
+So when converting from an Any instance only the Any type is used for all the generic arguments:
+
+.. code-block::
+
+    let a = [1,2,3]
+
+    let my_any: Any = a
+
+    match my_any
+        case Array!<Int>
+            // error, will not compile!
+        endcase
+        case Array!<Any>
+            // now available iter function but as if declared as
+            // returning Iterator!<ArrayItem!<Any>>
+            for item in my_any.iter()
+                let result = match item.value
+                    case Int
+                        item.value > 1
+                    endcase
+                    else
+                        false
+                endmatch
+            endfor
+        endcase
+
+    endmatch
+
 
 Plan
 ----
