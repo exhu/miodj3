@@ -12,17 +12,37 @@ Samples
 
 .. code-block::
 
-    unit miod_sys_def
+    # minimal runtime support
+    unit miod_runtime
 
+    pub closure OnPanic(msg: String)
+
+    pub proc set_on_panic(on_panic: OnPanic)
+
+    # the minimal unit for language support, implicitly imported as if using importall
+    unit miod_builtins
+
+    struct _builtin
+    endstruct
+
+    struct _panic
+    endstruct
+
+    @_panic
+    proc panic(msg: String)
+
+    # instanciating this type generates a compilation error
     @_builtin
     struct Any
     endstruct
 
+    # instanciating this type generates a compilation error
     @_builtin
     struct Int
     endstruct
 
     # system tag annotation
+    @_builtin
     struct _build_tag
         pub name: String
     endstruct
@@ -67,6 +87,7 @@ Samples
     # that's why arrays are used.
     # `for` usage example:
     proc fmtstr(fmt: String, args: Array!<Any>)
+        # can panic
         for i in args.iter()
             "argument N".append(i.index.str())
             match i.value
@@ -87,7 +108,14 @@ Samples
             endif
         endfor
 
-        while false
+        # equivalent to the upper
+        while let it = args.iter(); it.has_next()
+            let i = match it.next().value_or_panic().value
+                        case v: Int
+                            v
+                        else
+                            0
+                    endmatch
         endwhile
     end
 
@@ -172,7 +200,8 @@ Samples
         value { value: A }
     endvariant
     
-    proc Optional!<A>::value_or_fail(self): A, panic
+    @_panic
+    proc Optional!<A>::value_or_panic(self): A
         match self
             case value
                 self.value
@@ -394,7 +423,7 @@ Plan
 - proc
 - call proc
 - cproc
-- let, var
+- let, let mut
 - struct
 - retain, release, weak
 - annotations
@@ -414,6 +443,6 @@ Plan
 - getters, setters, op_mut
 - reflection & introspection
 - proc_addr (needed only for optimization?)
-- _op_retain, _op_release, _op_free
-- _op_mut_field
-- _op_eq, deep_eq
+- _op_retain, _op_release, _op_free -- must be called when operated on Any instance as well.
+- _op_mut_field -- must be called when operated on Any instance, and via reflection.
+- _op_eq, deep_eq -- optional, do we really need it? 'is, ==' vs only '==' -- python vs java style?
