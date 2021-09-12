@@ -252,6 +252,8 @@ Samples
         self.a == other.a && self.c == other.c
     end
 
+    # must generate compilation error when any of _op_* called or passed in code
+    # also trigger error if initial underscore is used in naming except in std library
     proc Object::_op_retain(self)
     end
 
