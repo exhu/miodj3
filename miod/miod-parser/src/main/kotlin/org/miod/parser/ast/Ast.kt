@@ -72,7 +72,11 @@ abstract class CompilationError(val location: Location?, val msg: String) {
     }
 }
 
+class FileReadError(path: Path) : CompilationError(null, "cannot read '$path'")
+
+class ParserError(location: Location, msg: String) : CompilationError(location, msg)
 class SyntaxError(location: Location, msg: String) : CompilationError(location, msg)
+
 class UndefinedIdentifier(location: Location, name: String) :
     CompilationError(location, "$name is undefined")
 
