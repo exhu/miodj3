@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class LibraryTest {
+class SyntaxParserTest {
     @Test fun UndefinedIdentifierErrorClassTest() {
         val ce = UndefinedIdentifier(Location(
             Path.of("a", "sub"), TextPosition(1,1),
@@ -25,8 +25,18 @@ class LibraryTest {
     @Test fun unitHeaderTest() {
         println(System.getProperty("user.dir"))
         val builder = AstBuilder(Path.of("test-sources", "empty_unit.miod"))
+        val parserResult = builder.parse()
+        println(builder.errors.errors)
+        assertTrue(parserResult)
+        val astResult = builder.buildAst()
+        assertTrue(astResult)
+    }
+
+    @Test fun unitHeaderWithAnnotationsAndCommentsTest() {
+        val builder = AstBuilder(Path.of("test-sources", "empty_unit_body.miod"))
         val result = builder.parse()
         println(builder.errors.errors)
         assertTrue(result)
+        assertTrue(builder.buildAst())
     }
 }

@@ -2,30 +2,34 @@ grammar Miod;
 
 compUnit: unitHeader unitBody EOF;
 
-unitHeader: NEWLINE* comments? unitDocs? unit NEWLINE* imports?;
+emptyLine: NEWLINE;
+
+emptyLines: emptyLine+;
+
+unitHeader: comments? emptyLines? unitDocs? unit imports?;
 
 unitDocs: docs;
 
-unit: UNIT unitName=ID NEWLINE+;
+unit: UNIT unitName=ID NEWLINE;
 
-comments: COMMENT+ NEWLINE*;
-docs: DOC_COMMENT+ NEWLINE*;
+comments: COMMENT+;
+docs: DOC_COMMENT+;
 
 unitBody: globalStatements?;
 
 imports: importDecl+;
-importDecl: importUnit | importAllFromUnit;
+importDecl: emptyLines? comments? (importUnit | importAllFromUnit);
 
 // IMPORT imports units, so that public symbols can be addressed as myunit.procName
-importUnit: comments? IMPORT unitName=ID NEWLINE;
+importUnit: IMPORT unitName=ID NEWLINE;
 
 // IMPORT_ALL imports unit public symbols into global namespace
-importAllFromUnit: comments? IMPORT_ALL unitName=ID NEWLINE;
+importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;
 
 globalStmt:
     constDecl
     | comments
-    | NEWLINE
+    | emptyLines
     ;
 
 globalStatements: globalStmt+;
@@ -34,12 +38,12 @@ constDecl: docs? annotations? PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIG
 
 annotations: annotation+;
 
-annotation: ANNOTATE name=ID structInitLiteralNoExpr? NEWLINE;
+annotation: emptyLines? comments? emptyLines? annotationWithData | annotationEmpty;
+annotationWithData: ANNOTATE name=ID structInitLiteralNoExpr NEWLINE;
+annotationEmpty: ANNOTATE name=ID NEWLINE;
 
 // no expressions in initialization
-structInitLiteralNoExpr: OPEN_CURLY NEWLINE?
-    initNamedMembersNoExpr | literal
-    CLOSE_CURLY;
+structInitLiteralNoExpr: OPEN_CURLY NEWLINE? (literal | initNamedMembersNoExpr) CLOSE_CURLY;
 
 initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA initNamedMemberNoExpr)*;
 initNamedMemberNoExpr: ID COLON literal;

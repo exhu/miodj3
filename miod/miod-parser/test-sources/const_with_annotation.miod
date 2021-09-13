@@ -1,0 +1,13 @@
+# commentsjj
+# commets line 2
+## documentation comment line 1
+## documentation line 2
+## docs line 3
+unit empty_unit_body
+@_some_annotation
+
+@_some_annotation_with_value { false }
+@_some_annotation_with_fields { x: 1, y: 2 }
+const a = 3
+
+const b: String = "asda"

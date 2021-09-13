@@ -36,6 +36,7 @@ private fun tokenPosition(token: Token): TextPosition {
 class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
     var compUnit: CompUnit? = null
     val errors = ParsingErrors()
+    var tree: ParseTree? = null
 
     fun parse(): Boolean {
         if (filePath.toFile().canRead()) {
@@ -46,15 +47,19 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             lexer.addErrorListener(this)
             val tokens = CommonTokenStream(lexer)
             val parser = MiodParser(tokens)
-            parser.removeErrorListeners()
+            //parser.removeErrorListeners()
             parser.addErrorListener(this)
             // run parser
-            val tree = parser.compUnit()
-            ParseTreeWalker.DEFAULT.walk(this, tree);
+            tree = parser.compUnit()
         } else {
             errors.append(FileReadError(filePath))
         }
 
+        return errors.success()
+    }
+
+    fun buildAst(): Boolean {
+        ParseTreeWalker.DEFAULT.walk(this, tree);
         return errors.success()
     }
 
@@ -68,7 +73,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         configs: ATNConfigSet?
     ) {
         errors.append(ParserError(Location(filePath, TextPosition(0,0),
-            TextPosition(0,0)), "grammar ambiguity"))
+            TextPosition(0,0)), "grammar ambiguity ${ambigAlts}"))
     }
 
     override fun reportContextSensitivity(
@@ -107,12 +112,13 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             TextPosition(0,0)), "grammar attempting full context"))
     }
 
-    // TODO write actual tree loading/parsing and parsing test
     override fun enterUnitHeader(ctx: MiodParser.UnitHeaderContext?) {
         if (ctx != null) {
+            val unitName = ctx.unit().unitName?.text ?: ""
+            println("unitName=$unitName")
             compUnit = CompUnit(
                 Location(filePath, tokenPosition(ctx.start), tokenPosition(ctx.stop)),
-                ctx.unit().unitName.text,
+                unitName,
                 null,
                 null,
                 arrayOf(),
