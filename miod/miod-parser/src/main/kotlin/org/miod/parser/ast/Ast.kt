@@ -4,8 +4,8 @@ import java.nio.file.Path
 
 /// location marks unit name
 class CompUnit(
-    val location: Location, val name: String, val comment: Comment,
-    val doc: DocComment, val imports: Array<Import>, val globals: Array<GlobalStatement>
+    val location: Location, val name: String, val comment: Comment?,
+    val doc: DocComment?, val imports: Array<Import>, val globals: Array<GlobalStatement>
 )
 
 class TextPosition(val line: Int, val column: Int) {
@@ -63,9 +63,12 @@ class SymbolTable(
     val symbols: Map<String, Symbol>
 )
 
-abstract class CompilationError(val location: Location, val msg: String) {
+abstract class CompilationError(val location: Location?, val msg: String) {
     override fun toString(): String {
-        return "error: $location: $msg"
+        if (location != null) {
+            return "error: $location: $msg"
+        }
+        return "error: $msg"
     }
 }
 
