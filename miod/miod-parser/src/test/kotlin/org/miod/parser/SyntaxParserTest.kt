@@ -3,15 +3,10 @@
  */
 package org.miod.parser
 
-import org.miod.parser.ast.CompilationError
-import org.miod.parser.ast.Location
-import org.miod.parser.ast.TextPosition
-import org.miod.parser.ast.UndefinedIdentifier
+import org.miod.parser.ast.*
 import org.miod.parser.parser.AstBuilder
 import java.nio.file.Path
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class SyntaxParserTest {
     @Test fun UndefinedIdentifierErrorClassTest() {
@@ -38,5 +33,24 @@ class SyntaxParserTest {
         println(builder.errors.errors)
         assertTrue(result)
         assertTrue(builder.buildAst())
+    }
+
+    @Test fun constWithAnnotationTest() {
+        val builder = AstBuilder(Path.of("test-sources", "const_with_annotation.miod"))
+        val result = builder.parse()
+        println(builder.errors.errors)
+        assertTrue(result)
+        assertTrue(builder.buildAst())
+    }
+
+    @Test fun unitRedeclarationTest() {
+        val builder = AstBuilder(Path.of("test-sources", "unit_redecl.miod"))
+        val parseResult = builder.parse()
+        println(builder.errors.errors)
+        assertTrue(parseResult)
+        assertFalse(builder.buildAst())
+        println(builder.errors.errors)
+        assertIs<UnitRedeclaration>(builder.errors.errors[0])
+        assertIs<UnitRedeclaration>(builder.errors.errors[1])
     }
 }

@@ -28,8 +28,20 @@ class ParsingErrors {
     }
 }
 
-private fun tokenPosition(token: Token): TextPosition {
-    return TextPosition(token.line, token.charPositionInLine)
+private fun tokenStartPosition(token: Token?): TextPosition {
+    if (token != null) {
+        return TextPosition(token.line, token.charPositionInLine)
+    }
+
+    return TextPosition(0,0)
+}
+
+private fun tokenEndPosition(token: Token?): TextPosition {
+    if (token != null) {
+        return TextPosition(token.line, token.charPositionInLine + token.text.length-1)
+    }
+
+    return TextPosition(0,0)
 }
 
 /// Builds AST for a single compilation unit.
@@ -47,7 +59,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             lexer.addErrorListener(this)
             val tokens = CommonTokenStream(lexer)
             val parser = MiodParser(tokens)
-            //parser.removeErrorListeners()
+            parser.removeErrorListeners()
             parser.addErrorListener(this)
             // run parser
             tree = parser.compUnit()
@@ -63,6 +75,10 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         return errors.success()
     }
 
+    private fun zeroLocation(): Location {
+        return Location(filePath, TextPosition(0,0),
+            TextPosition(0,0))
+    }
     override fun reportAmbiguity(
         recognizer: Parser?,
         dfa: DFA?,
@@ -72,8 +88,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         ambigAlts: BitSet?,
         configs: ATNConfigSet?
     ) {
-        errors.append(ParserError(Location(filePath, TextPosition(0,0),
-            TextPosition(0,0)), "grammar ambiguity ${ambigAlts}"))
+        errors.append(ParserError(zeroLocation(), "grammar ambiguity $ambigAlts"))
     }
 
     override fun reportContextSensitivity(
@@ -84,8 +99,12 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         prediction: Int,
         configs: ATNConfigSet?
     ) {
-        errors.append(ParserError(Location(filePath, TextPosition(0,0),
-            TextPosition(0,0)), "grammar context sensitivity"))
+        errors.append(ParserError(zeroLocation(), "grammar context sensitivity"))
+    }
+
+    private fun locationAt(line: Int, column: Int): Location {
+        return Location(filePath, TextPosition(line, column),
+            TextPosition(line, column))
     }
 
     override fun syntaxError(
@@ -96,8 +115,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         msg: String?,
         e: RecognitionException?
     ) {
-        errors.append(SyntaxError(Location(filePath, TextPosition(line, charPositionInLine),
-            TextPosition(line, charPositionInLine)), msg ?: ""))
+        errors.append(SyntaxError(locationAt(line, charPositionInLine), msg ?: ""))
     }
 
     override fun reportAttemptingFullContext(
@@ -108,23 +126,44 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         conflictingAlts: BitSet?,
         configs: ATNConfigSet?
     ) {
-        errors.append(ParserError(Location(filePath, TextPosition(0,0),
-            TextPosition(0,0)), "grammar attempting full context"))
+        errors.append(ParserError(zeroLocation(), "grammar attempting full context"))
+    }
+
+    private fun locationFillToken(token: Token): Location {
+        return Location(filePath, tokenStartPosition(token), tokenEndPosition(token))
     }
 
     override fun enterUnit(ctx: MiodParser.UnitContext?) {
-        // TODO grab and attach currently accumulated annotations and docs
+        assert(ctx != null)
         if (ctx != null) {
+            val location = locationFillToken(ctx.name)
+            if (compUnit != null) {
+                errors.append(UnitRedeclaration(location, compUnit!!.location))
+                return
+            }
+
+            // TODO grab and attach currently accumulated annotations and docs
             val unitName = ctx.name?.text ?: ""
             println("unitName=$unitName")
             compUnit = CompUnit(
-                Location(filePath, tokenPosition(ctx.start), tokenPosition(ctx.stop)),
+                location,
                 unitName,
                 null,
                 null,
                 arrayOf(),
                 arrayOf()
             )
+        }
+    }
+
+    private fun locationFillTokens(start: Token, stop: Token): Location {
+        return Location(filePath, tokenStartPosition(start), tokenEndPosition(stop))
+    }
+
+    override fun enterUnitContents(ctx: MiodParser.UnitContentsContext?) {
+        assert(ctx != null)
+        if (ctx != null && compUnit == null) {
+            errors.append(UnitDeclarationExpected(locationFillToken(ctx.start)))
         }
     }
 }

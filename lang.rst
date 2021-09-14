@@ -497,3 +497,7 @@ Code generation and build process
 
 Compiler adds system library to the unit search path. System library C code is referenced
 in the cmake scripts.
+
+*@_build_tag* annotation marks code for conditional compilation.
+The code element is compiled only if one of the current build tags matches any from the 
+associated annotations.

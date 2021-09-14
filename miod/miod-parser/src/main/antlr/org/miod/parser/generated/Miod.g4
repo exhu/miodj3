@@ -8,9 +8,12 @@ globals: emptyLine
     | doc
     | comment
     | unit
-    | importDecl
-    | constDecl
     | annotation
+    | unitContents
+    ;
+
+unitContents:  importDecl
+    | constDecl
     ;
 
 comment: COMMENT;
