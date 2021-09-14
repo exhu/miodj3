@@ -1,3 +1,5 @@
+// semantic ast with the important information, suitable to generate code
+// and docs
 package org.miod.parser.ast
 
 import java.nio.file.Path

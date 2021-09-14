@@ -112,9 +112,10 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             TextPosition(0,0)), "grammar attempting full context"))
     }
 
-    override fun enterUnitHeader(ctx: MiodParser.UnitHeaderContext?) {
+    override fun enterUnit(ctx: MiodParser.UnitContext?) {
+        // TODO grab and attach currently accumulated annotations and docs
         if (ctx != null) {
-            val unitName = ctx.unit().unitName?.text ?: ""
+            val unitName = ctx.name?.text ?: ""
             println("unitName=$unitName")
             compUnit = CompUnit(
                 Location(filePath, tokenPosition(ctx.start), tokenPosition(ctx.stop)),

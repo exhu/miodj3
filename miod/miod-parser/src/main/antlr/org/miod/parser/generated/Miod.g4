@@ -1,24 +1,27 @@
 grammar Miod;
 
-compUnit: unitHeader unitBody EOF;
+// grammar is simplified for matching instead of optimized for listener
+// e.g. 'unit' keyword can be used only once but the grammar allows for duplication
+compUnit: globals+ EOF;
+
+globals: emptyLine
+    | doc
+    | comment
+    | unit
+    | importDecl
+    | constDecl
+    | annotation
+    ;
+
+comment: COMMENT;
 
 emptyLine: NEWLINE;
 
-emptyLines: emptyLine+;
+doc: DOC_COMMENT;
 
-unitHeader: comments? emptyLines? unitDocs? unit imports?;
+unit: UNIT name=ID NEWLINE;
 
-unitDocs: docs;
-
-unit: UNIT unitName=ID NEWLINE;
-
-comments: COMMENT+;
-docs: DOC_COMMENT+;
-
-unitBody: globalStatements?;
-
-imports: importDecl+;
-importDecl: emptyLines? comments? (importUnit | importAllFromUnit);
+importDecl: importUnit | importAllFromUnit;
 
 // IMPORT imports units, so that public symbols can be addressed as myunit.procName
 importUnit: IMPORT unitName=ID NEWLINE;
@@ -26,19 +29,12 @@ importUnit: IMPORT unitName=ID NEWLINE;
 // IMPORT_ALL imports unit public symbols into global namespace
 importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;
 
-globalStmt:
-    constDecl
-    | comments
-    | emptyLines
-    ;
+constDecl: PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIGN NEWLINE? literal NEWLINE;
 
-globalStatements: globalStmt+;
+typeSpec: ID;
 
-constDecl: docs? annotations? PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIGN NEWLINE? literal NEWLINE;
-
-annotations: annotation+;
-
-annotation: emptyLines? comments? emptyLines? annotationWithData | annotationEmpty;
+// annotations
+annotation: annotationWithData | annotationEmpty;
 annotationWithData: ANNOTATE name=ID structInitLiteralNoExpr NEWLINE;
 annotationEmpty: ANNOTATE name=ID NEWLINE;
 
@@ -48,20 +44,29 @@ structInitLiteralNoExpr: OPEN_CURLY NEWLINE? (literal | initNamedMembersNoExpr) 
 initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA initNamedMemberNoExpr)*;
 initNamedMemberNoExpr: ID COLON literal;
 
+// literals
+literal: stringLiteral | floatLiteral | boolLiteral | integerLiteral | strFromId;
+
 boolLiteral: TRUE | FALSE;
 
 strFromId: STR_FROM_ID name=ID;
 
 stringLiteral: STRING;
+
 floatLiteral: FLOAT_OR_DOUBLE;
+
 decimalLiteral: INTEGER;
-integerLiteral: decimalLiteral;
 
-literal: stringLiteral | floatLiteral | boolLiteral | integerLiteral | strFromId;
+hexadecimalLiteral: INT_HEX;
 
+binaryLiteral: INT_BIN;
+
+octalLiteral: INT_OCTAL;
+
+integerLiteral: decimalLiteral | hexadecimalLiteral | binaryLiteral | octalLiteral;
+
+// procs
 argDecl: OPEN_PAREN CLOSE_PAREN;
-
-typeSpec: ID;
 
 expr: literal
     | ID;
@@ -70,12 +75,11 @@ procBody: ;
 
 
 //// lexer --------------
-
 fragment NL: ('\r'? '\n');
 
 NEWLINE: NL;
-// comments
 
+// comments
 DOC_COMMENT: '##' .*? NL;
 COMMENT: '#' .*? NL;
 
