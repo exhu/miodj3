@@ -12,10 +12,6 @@ globals: emptyLine
     | unitContents
     ;
 
-unitContents:  importDecl
-    | constDecl
-    ;
-
 comment: COMMENT;
 
 emptyLine: NEWLINE;
@@ -23,6 +19,81 @@ emptyLine: NEWLINE;
 doc: DOC_COMMENT;
 
 unit: UNIT name=ID NEWLINE;
+
+// moved unit body statements to separate rule
+// to trigger an error in the listener if those statements
+// are met before 'unit' declaration
+unitContents: PUBLIC? unitDeclarations;
+
+unitDeclarations: importDecl
+    | constDecl
+    | alias
+    | struct
+    | closure
+    | variant
+    | enumDecl
+    | flags
+    | cproc
+    | proc
+    ;
+
+alias: ALIAS ID genericArgs? EQUALS typeNameWithArgs NEWLINE;
+
+struct: STRUCT name=ID NEWLINE field* END_STRUCT NEWLINE;
+
+callableArgsAndReturn: OPEN_PAREN procArgsDecl? CLOSE_PAREN (COLON typeNameWithArgs)?;
+
+closure: CLOSURE name=ID callableArgsAndReturn NEWLINE;
+
+variant: VARIANT name=typeNameWithArgs NEWLINE variantName* END_VARIANT NEWLINE;
+variantName: annotation* typeNameWithArgs NEWLINE;
+
+enumDecl: ENUM name=ID NEWLINE enumValue* END_ENUM;
+enumValue: annotation* name=ID NEWLINE;
+
+flags: FLAGS name=ID NEWLINE enumValue END_FLAGS;
+
+cproc: CPROC name=namespacedId callableArgsAndReturn NEWLINE;
+
+proc: PROC name=namespacedId callableArgsAndReturn NEWLINE procBody END_PROC;
+
+procBody: comment
+    | doc
+    | annotation
+    | expr NEWLINE
+    ;
+
+varDecl: LET MUT? name=ID assign;
+
+assign: EQUALS NEWLINE? expr;
+
+varAssign: name=ID assign;
+
+// TODO...
+newStruct: typeNameWithArgs OPEN_CURLY CLOSE_CURLY;
+
+expr: literal
+    | namespacedId
+    | varDecl
+    | varAssign
+    | newStruct
+    ;
+
+procArgsDecl: idTypePair (COMMA NEWLINE? idTypePair);
+
+idTypePair: name=ID COLON typeNameWithArgs;
+
+field: annotation* PUBLIC? MUT? idTypePair setterOrGetter* NEWLINE;
+setterOrGetter: COMMA NEWLINE? (SETTER|GETTER) name=ID;
+
+typeNameWithArgs: (WEAK | WEAK_MONITOR | SHARED)? namespacedId genericArgs?;
+
+genericArgs: typeArgsOpen typeNameWithArgs (COMMA NEWLINE? typeNameWithArgs)  typeArgsClose;
+
+typeArgsOpen: TYPE_ARGS_OPEN;
+typeArgsClose: GREATER;
+
+namespacedId: root=ID (NAMESPACE_SEP subName=ID)*;
 
 importDecl: importUnit | importAllFromUnit;
 
@@ -32,9 +103,7 @@ importUnit: IMPORT unitName=ID NEWLINE;
 // IMPORT_ALL imports unit public symbols into global namespace
 importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;
 
-constDecl: PUBLIC? CONST name=ID (COLON type=typeSpec)? ASSIGN NEWLINE? literal NEWLINE;
-
-typeSpec: ID;
+constDecl: PUBLIC? CONST name=ID (COLON type=ID)? ASSIGN NEWLINE? literal NEWLINE;
 
 // annotations
 annotation: annotationWithData | annotationEmpty;
@@ -44,7 +113,7 @@ annotationEmpty: ANNOTATE name=ID NEWLINE;
 // no expressions in initialization
 structInitLiteralNoExpr: OPEN_CURLY NEWLINE? (literal | initNamedMembersNoExpr) CLOSE_CURLY;
 
-initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA initNamedMemberNoExpr)*;
+initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA NEWLINE? initNamedMemberNoExpr)*;
 initNamedMemberNoExpr: ID COLON literal;
 
 // literals
@@ -68,15 +137,6 @@ octalLiteral: INT_OCTAL;
 
 integerLiteral: decimalLiteral | hexadecimalLiteral | binaryLiteral | octalLiteral;
 
-// procs
-argDecl: OPEN_PAREN CLOSE_PAREN;
-
-expr: literal
-    | ID;
-
-procBody: ;
-
-
 //// lexer --------------
 fragment NL: ('\r'? '\n');
 
@@ -92,16 +152,19 @@ WS: (' ' | '\t')+ -> skip;
 // keywords
 UNIT: 'unit';
 IS: 'is';
-PANIC: 'panic';
 CONST: 'const';
 PUBLIC: 'pub';
 MUT: 'mut';
 LET: 'let';
 PROC: 'proc';
 CPROC: 'cproc';
-END_PROC: 'end';
+END_PROC: 'endproc';
 IMPORT: 'import';
 IMPORT_ALL: 'importall';
+VARIANT: 'variant';
+END_VARIANT: 'endvariant';
+MATCH: 'match';
+END_MATCH: 'endmatch';
 IF: 'if';
 THEN: 'then';
 ELSE: 'else';
@@ -161,7 +224,7 @@ WEAK_MONITOR: 'weak_monitor';
 SETTER: 'setter';
 GETTER: 'getter';
 // Map$<String, Integer> -- integer map generic type
-TYPE_ARGS_OPEN: '$<';
+TYPE_ARGS_OPEN: '!<';
 STR_FROM_ID: 'str_from_id';
 RETAIN: 'retain';
 SHARED: 'shared'; // for pointers shared between threads

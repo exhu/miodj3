@@ -95,7 +95,7 @@ Samples
     @_build_tag { "test" }
     pub proc only_for_test()
         # proc is compiled only if "test" tag is passed
-    end
+    endproc
 
     @_build_tag { "ptr32" }
     alias PtrInt = Int
@@ -153,7 +153,7 @@ Samples
                             0
                     endmatch
         endwhile
-    end
+    endproc
 
     # compiler/hidden runtime implementation
     struct Array!<I>
@@ -206,7 +206,7 @@ Samples
                 ctx.i < self.len
             endclosure
         }
-    end
+    endproc
     
 
     alias Int = Int32
@@ -225,17 +225,18 @@ Samples
 
     proc Object::get_s(self): String
         "hello"
-    end
+    endproc
 
     proc Object::set_a(self, a: Int)
         self.a = a
-    end
+    endproc
 
+    # initial syntax
     pub variant Optional!<A>
         empty,
         value { value: A }
     endvariant
-    
+
     @_panic
     proc Optional!<A>::value_or_panic(self): A
         match self
@@ -245,7 +246,7 @@ Samples
         else
             panic("Optional is empty.")
         endmatch
-    end
+    endproc
     
     proc Optional!<A>::value_or_default(self, default: A): A
         match self
@@ -255,11 +256,36 @@ Samples
         else
             default
         endmatch
-    end
+    endproc
     enum Days
         working
         holiday
     endenum
+    
+
+    # simpler alternative
+    struct Void
+    endstruct
+
+    # implemented as struct with one field to query type for all possible values
+    # duplicate types are not checked, i.e. for Optional!<EmptyOptional>
+    # at runtime the variants are Empty, Any
+    pub variant Optional!<A>
+        Void,
+        A
+    endvariant
+
+    # generic types are not available at runtime, so need better alternative for variant
+    # probably need nullability
+
+    pub variant ParseIntResult 
+        Int
+        Void
+    endvariant
+
+    pub proc parse_int(s: String): ParseIntResult
+    endproc
+
     
     const global_const = "aaa"
 
@@ -275,32 +301,32 @@ Samples
 
     proc Object::calc(self)
         self.a + self.c
-    end
+    endproc
 
     proc Object::new(c: Int): Object
         Object {
             a: 0,
             c: c,
         }
-    end
+    endproc
 
     proc Object::_op_equals(self, other: Object): Bool
         self.a == other.a && self.c == other.c
-    end
+    endproc
 
     # must generate compilation error when any of _op_* called or passed in code
     # also trigger error if initial underscore is used in naming except in std library
     proc Object::_op_retain(self)
-    end
+    endproc
 
     proc Object::_op_release(self)
-    end
+    endproc
 
     proc Object::_op_free(self)
-    end
+    endproc
 
     proc Object::_op_mut_field(self, field_name: String)
-    end
+    endproc
 
     proc assignment_test(b: Object, opt: Optional!<Object>, any: Any)
         let a = b
@@ -321,7 +347,7 @@ Samples
                 any.a = 77
             endcase
         endmatch
-    end
+    endproc
 
     proc closure_sample()
         let o = Object::new(3)
@@ -329,7 +355,7 @@ Samples
         let cl =  closure[weak o, c](x: Int): Bool
             false
         endclosure
-    end
+    endproc
 
     @_deep_eq
     struct Deep
@@ -348,7 +374,7 @@ Samples
 
         let da = DynamicArray!<>::from([1, 2, 3])
         da.append(5)
-    end
+    endproc
 
     # closure to allow some context, like constants/salts etc
     closure HashProc!<K>(item: K): Int
@@ -365,7 +391,7 @@ Samples
     endstruct
 
     proc HashMap!<K, V>::new(hash_proc: HashProc!<K>)
-    end
+    endproc
 
     alias StringHashMap!<V> = HashMap!<String, V>
 
@@ -373,22 +399,22 @@ Samples
         HashMap!<String, V>::new(closure(item: String): Int
             hash_from_string(item)
         endclosure)
-    end
+    endproc
 
     proc StringHashMap!<V>::new()
         string_hash_map!<V>()
-    end
+    endproc
 
     proc string_hash_map_from!<V>(items: Iterator!<KVPair!<String, V>>): HashMap!<String, V>
         let m = string_hash_map!<V>()
         m.insert_all(items)
         m
-    end
+    endproc
 
     proc hash_map_sample_init()
         let hm = string_hash_map_from([HashPair!<>{"a", 1}, HashPair!<>{"b", 2}])
 
-    end
+    endproc
 
 
 Semantic notes
