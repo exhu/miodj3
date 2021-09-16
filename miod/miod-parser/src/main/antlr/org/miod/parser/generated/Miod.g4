@@ -60,8 +60,27 @@ proc: PROC name=namespacedId callableArgsAndReturn NEWLINE procBody END_PROC;
 procBody: comment
     | doc
     | annotation
-    | expr NEWLINE
+    | statement
     ;
+
+statement: atomExpr NEWLINE
+    | callStatement
+;
+
+atomExpr: literal
+    | namespacedId
+    | varDecl
+    | varAssign
+    | newStruct
+    | retainExpr
+    | SELF
+    ;
+
+expr: atomExpr
+    | callExpr
+    ;
+
+retainExpr: RETAIN expr;
 
 varDecl: LET MUT? name=ID assign;
 
@@ -69,17 +88,16 @@ assign: EQUALS NEWLINE? expr;
 
 varAssign: name=ID assign;
 
-// TODO...
-newStruct: typeNameWithArgs OPEN_CURLY CLOSE_CURLY;
+newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit) CLOSE_CURLY;
 
-expr: literal
-    | namespacedId
-    | varDecl
-    | varAssign
-    | newStruct
-    ;
+fieldsInit: fieldInit (COMMA fieldInit)*;
+fieldInit: ID COLON expr;
 
-procArgsDecl: idTypePair (COMMA NEWLINE? idTypePair);
+callStatement: namespacedId callExpr;
+callExpr: OPEN_PAREN callArgs CLOSE_PAREN;
+callArgs: expr (COMMA expr)*;
+
+procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair);
 
 idTypePair: name=ID COLON typeNameWithArgs;
 
@@ -151,6 +169,7 @@ WS: (' ' | '\t')+ -> skip;
 
 // keywords
 UNIT: 'unit';
+SELF: 'self';
 IS: 'is';
 CONST: 'const';
 PUBLIC: 'pub';
