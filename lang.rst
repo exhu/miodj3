@@ -37,10 +37,14 @@ Samples
     struct _reflection
     endstruct
 
+
+    closure FromString(valueName: String): Any
+    closure AsString(value: Any): Any
+
     struct EnumType
         values: Array!<Any>
-        from_string: closure(valueName: String): Any
-        to_string: closure(value: Any): Any
+        from_string: FromString
+        as_string: AsString
     endstruct
 
     enum FieldTypeKind
@@ -60,11 +64,14 @@ Samples
         pub kind: FieldTypeKind
     endstruct
     
+    closure SetFieldValue(instance: Any, value: Any)
+    closure GetFieldValue(instance: Any): Any
+    
     struct FieldInfo
         pub name: String
         pub type: FieldType
-        pub set_value: closure(instance: Any, value: Any)
-        pub get_value: closure(instance: Any): Any
+        pub set_value: SetFieldValue
+        pub get_value: GetFieldValue
     endstruct
 
     # instanciating this type generates a compilation error

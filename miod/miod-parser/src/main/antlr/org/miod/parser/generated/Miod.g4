@@ -63,8 +63,7 @@ procBody: comment
     | statement
     ;
 
-statement: atomExpr NEWLINE
-    | callStatement
+statement: expr NEWLINE
 ;
 
 atomExpr: literal
@@ -72,13 +71,28 @@ atomExpr: literal
     | varDecl
     | varAssign
     | newStruct
-    | retainExpr
     | SELF
     ;
 
-expr: atomExpr
-    | callExpr
+expr: retainExpr
+    | atomExpr
+    | negExpr
+    | parensExpr
+    | expr callExpr
+    | expr assign
+    | expr fieldAccess
+    | expr MUL expr
+    | expr DIV expr
+    | expr MOD expr
+    | expr PLUS expr
+    | expr MINUS expr
     ;
+
+negExpr: MINUS expr;
+
+parensExpr: OPEN_PAREN expr CLOSE_PAREN;
+
+fieldAccess: DOT ID;
 
 retainExpr: RETAIN expr;
 
@@ -93,8 +107,7 @@ newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit) CLOSE_CURLY;
 fieldsInit: fieldInit (COMMA fieldInit)*;
 fieldInit: ID COLON expr;
 
-callStatement: namespacedId callExpr;
-callExpr: OPEN_PAREN callArgs CLOSE_PAREN;
+callExpr: OPEN_PAREN callArgs? CLOSE_PAREN;
 callArgs: expr (COMMA expr)*;
 
 procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair);
@@ -135,7 +148,7 @@ initNamedMembersNoExpr: initNamedMemberNoExpr (COMMA NEWLINE? initNamedMemberNoE
 initNamedMemberNoExpr: ID COLON literal;
 
 // literals
-literal: stringLiteral | floatLiteral | boolLiteral | integerLiteral | strFromId;
+literal: stringLiteral | numericLiteral | boolLiteral | strFromId;
 
 boolLiteral: TRUE | FALSE;
 
@@ -154,6 +167,8 @@ binaryLiteral: INT_BIN;
 octalLiteral: INT_OCTAL;
 
 integerLiteral: decimalLiteral | hexadecimalLiteral | binaryLiteral | octalLiteral;
+
+numericLiteral: integerLiteral | floatLiteral;
 
 //// lexer --------------
 fragment NL: ('\r'? '\n');
