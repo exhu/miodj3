@@ -37,7 +37,7 @@ unitDeclarations: importDecl
     | proc
     ;
 
-alias: ALIAS ID genericArgs? EQUALS typeNameWithArgs NEWLINE;
+alias: ALIAS ID genericArgs? ASSIGN typeNameWithArgs NEWLINE;
 
 struct: STRUCT name=ID NEWLINE field* END_STRUCT NEWLINE;
 
@@ -76,21 +76,10 @@ atomExpr: literal
 
 expr: retainExpr
     | atomExpr
-    | negExpr
-    | parensExpr
     | expr callExpr
     | expr assign
     | expr fieldAccess
-    | expr MUL expr
-    | expr DIV expr
-    | expr MOD expr
-    | expr PLUS expr
-    | expr MINUS expr
     ;
-
-negExpr: MINUS expr;
-
-parensExpr: OPEN_PAREN expr CLOSE_PAREN;
 
 fieldAccess: DOT ID;
 
@@ -98,7 +87,7 @@ retainExpr: RETAIN expr;
 
 varDecl: LET MUT? name=ID assign;
 
-assign: EQUALS NEWLINE? expr;
+assign: ASSIGN NEWLINE? expr;
 
 varAssign: name=ID assign;
 
@@ -122,7 +111,7 @@ typeNameWithArgs: (WEAK | WEAK_MONITOR | SHARED)? namespacedId genericArgs?;
 genericArgs: typeArgsOpen typeNameWithArgs (COMMA NEWLINE? typeNameWithArgs)  typeArgsClose;
 
 typeArgsOpen: TYPE_ARGS_OPEN;
-typeArgsClose: GREATER;
+typeArgsClose: CLOSE_BRACKET;
 
 namespacedId: root=ID (NAMESPACE_SEP subName=ID)*;
 
@@ -185,7 +174,6 @@ WS: (' ' | '\t')+ -> skip;
 // keywords
 UNIT: 'unit';
 SELF: 'self';
-IS: 'is';
 CONST: 'const';
 PUBLIC: 'pub';
 MUT: 'mut';
@@ -204,27 +192,7 @@ THEN: 'then';
 ELSE: 'else';
 ELIF: 'elif';
 END_IF: 'endif';
-PLUS: '+';
-MINUS: '-';
-DIV: '/';
-MUL: '*';
-MOD: '%';
-BNOT: '~';
-BOR: '|';
-BAND: '&';
-NOT: 'not';
-OR: 'or';
-AND: 'and';
-XOR: '^'; // only binary
-EQUALS: '==';
-NOT_EQ: '!=';
-LESS: '<';
-GREATER: '>';
-LESS_EQ: '<=';
-GREATER_EQ: '>=';
 ASSIGN: '=';
-SHL: 'shl';
-SHR: 'shr';
 TRUE: 'true';
 FALSE: 'false';
 ALIAS: 'alias';
@@ -234,7 +202,6 @@ ANNOTATE: '@';
 OPEN_CURLY: '{';
 CLOSE_CURLY: '}';
 COLON: ':';
-SEMICOLON: ';';
 COMMA: ',';
 OPEN_PAREN: '(';
 CLOSE_PAREN: ')';
@@ -257,8 +224,8 @@ WEAK: 'weak';
 WEAK_MONITOR: 'weak_monitor';
 SETTER: 'setter';
 GETTER: 'getter';
-// Map$<String, Integer> -- integer map generic type
-TYPE_ARGS_OPEN: '!<';
+// Map$[String, Integer] -- integer map generic type
+TYPE_ARGS_OPEN: '$[';
 STR_FROM_ID: 'str_from_id';
 RETAIN: 'retain';
 SHARED: 'shared'; // for pointers shared between threads

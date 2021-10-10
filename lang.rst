@@ -42,7 +42,7 @@ Samples
     closure AsString(value: Any): Any
 
     struct EnumType
-        values: Array!<Any>
+        values: Array$[Any]
         from_string: FromString
         as_string: AsString
     endstruct
@@ -129,7 +129,7 @@ Samples
     # varargs don't make sense, since you cannot reconstruct them to modify and pass next,
     # that's why arrays are used.
     # `for` usage example:
-    proc fmtstr(fmt: String, args: Array!<Any>)
+    proc fmtstr(fmt: String, args: Array$[Any])
         # can panic
         for i in args.iter()
             "argument N".append(i.index.str())
@@ -163,7 +163,7 @@ Samples
     endproc
 
     # compiler/hidden runtime implementation
-    struct Array!<I>
+    struct Array$[I]
         pub len: Int
 
         data: cpointer
@@ -172,11 +172,11 @@ Samples
     cprod id(any: Any): PtrInt
 
     # compiler/hidden runtime implementation
-    cproc Array!<I>::at(index: Int): Optional!<I>
+    cproc Array$[I]::at(index: Int): Optional$[I]
 
     # system-wide iterator structure, used by `for`
-    struct Iterator!<I>
-        next: closure(): Optional!<I>
+    struct Iterator$[I]
+        next: closure(): Optional$[I]
         has_next: closure(): Bool
     endstruct
 
@@ -184,29 +184,29 @@ Samples
         mut i: Int
     endstruct
 
-    struct ArrayItem!<I>
+    struct ArrayItem$[I]
         index: Int
         value: I
     endstruct
 
 
-    proc Array!<I>::iter(self): Iterator!<ArrayItem!<I>>
+    proc Array$[I]::iter(self): Iterator$[ArrayItem$[I]]
         let ctx = ArrayIterContext { i: 0 }
-        Iterator!<I> {
-            next: closure[ctx, self](): Optional!<ArrayItem!<I>>
+        Iterator$[I] {
+            next: closure[ctx, self](): Optional$[ArrayItem$[I]]
                 let item = self.at(ctx.i)
                 let i = ctx.i
-                if i < self.len
-                    ctx.i += 1
+                if lt(i, self.len)
+                    ctx.i = add(ctx.i, 1) # retain is implicit for fields and return values
                 endif
                 match item 
                     case value
                         # automatic generic args
-                        Optional!<>::value { ArrayItem!<> { i, retain value.value } }
+                        Optional$[]::value { ArrayItem$[] { i, value.value } }
                     endcase
                     else
                         # automatic generic args
-                        Optional!<>::empty
+                        Optional$[]::empty
                 endmatch
             endclosure
             has_next: closure[ctx, self](): Bool
@@ -239,13 +239,13 @@ Samples
     endproc
 
     # initial syntax
-    pub variant Optional!<A>
+    pub variant Optional$[A]
         empty,
         value { value: A }
     endvariant
 
     @_panic
-    proc Optional!<A>::value_or_panic(self): A
+    proc Optional$[A]::value_or_panic(self): A
         match self
             case value
                 retain self.value
@@ -255,7 +255,7 @@ Samples
         endmatch
     endproc
     
-    proc Optional!<A>::value_or_default(self, default: A): A
+    proc Optional$[A]::value_or_default(self, default: A): A
         match self
             case value
                 retain self.value
@@ -275,9 +275,9 @@ Samples
     endstruct
 
     # implemented as struct with one field to query type for all possible values
-    # duplicate types are not checked, i.e. for Optional!<EmptyOptional>
+    # duplicate types are not checked, i.e. for Optional$[EmptyOptional]
     # at runtime the variants are Empty, Any
-    pub variant Optional!<A>
+    pub variant Optional$[A]
         Void,
         A
     endvariant
@@ -307,7 +307,7 @@ Samples
     pub closure CallbackClosure(): Bool
 
     proc Object::calc(self)
-        self.a + self.c
+        discard +(self.a, self.c)
     endproc
 
     proc Object::new(c: Int): Object
@@ -335,17 +335,13 @@ Samples
     proc Object::_op_mut_field(self, field_name: String)
     endproc
 
-    proc assignment_test(b: Object, opt: Optional!<Object>, any: Any)
+    proc assignment_test(b: Object, opt: Optional$[Object], any: Any)
         let a = b
         # access to b becomes invalid
         b.c
         match opt
             case value
-                # fails, because opt.value is not a variable
                 let c = opt.value
-
-                # correct:
-                let c = retain opt.value
             endcase
         endmatch
 
@@ -371,57 +367,66 @@ Samples
     endstruct
 
     proc array_sample()
-        # [..,] -- syntactic sugar to construct Array!<> instance
+        # [..,] -- syntactic sugar to construct Array$[] instance
         let a = [1,2,3]
 
         # mutable array has set_value_at(self, value, index)
-        let ma = MutableArray!<>::from([1, 2, 3])
+        let ma = MutableArray$[]::from([1, 2, 3])
         ma.set_value_at(5, 1)
         assert(ma.at(1).value_or_fail(), 5)
 
-        let da = DynamicArray!<>::from([1, 2, 3])
+        let da = DynamicArray$[]::from([1, 2, 3])
         da.append(5)
     endproc
 
     # closure to allow some context, like constants/salts etc
-    closure HashProc!<K>(item: K): Int
+    closure HashProc$[K](item: K): Int
 
-    struct HashMap!<K, V>
+    struct HashMap$[K, V]
         pub len: Int
 
-        hash_proc: HashProc!<K>
+        hash_proc: HashProc$[K]
     endstruct
 
-    struct KvPair!<K, V>
+    struct KvPair$[K, V]
         pub key: K
         pub value: V
     endstruct
 
-    proc HashMap!<K, V>::new(hash_proc: HashProc!<K>)
+    proc HashMap$[K, V]::new(hash_proc: HashProc$[K])
     endproc
 
-    alias StringHashMap!<V> = HashMap!<String, V>
+    alias StringHashMap$[V] = HashMap$[String, V]
 
-    proc string_hash_map!<V>(): StringHashMap!<V>
-        HashMap!<String, V>::new(closure(item: String): Int
+    proc string_hash_map$[V](): StringHashMap$[V]
+        HashMap$[String, V]::new(closure(item: String): Int
             hash_from_string(item)
         endclosure)
     endproc
 
-    proc StringHashMap!<V>::new()
-        string_hash_map!<V>()
+    proc StringHashMap$[V]::new()
+        string_hash_map$[V]()
     endproc
 
-    proc string_hash_map_from!<V>(items: Iterator!<KVPair!<String, V>>): HashMap!<String, V>
-        let m = string_hash_map!<V>()
+    proc string_hash_map_from$[V](items: Iterator$[KVPair$[String, V]]): HashMap$[String, V]
+        let m = string_hash_map$[V]()
         m.insert_all(items)
         m
     endproc
 
     proc hash_map_sample_init()
-        let hm = string_hash_map_from([HashPair!<>{"a", 1}, HashPair!<>{"b", 2}])
+        let hm = string_hash_map_from([HashPair$[]{"a", 1}, HashPair$[]{"b", 2}])
 
     endproc
+
+    # multiple procs can have the same name but different type of the first arg
+    @_builtin
+    cproc +(a: Int, b: Int): Int
+    @_builtin
+    cproc +(a: Float, b: Float): Float
+
+    @_builtin
+    cproc and(a: Boolean, b: Boolean): Boolean
 
 
 Semantic notes
@@ -464,7 +469,7 @@ Generics
 At the first iteration of the language, generics are implemented as syntactic sugar only. An instance
 of a generic structure does not have information on the actual types it was constructed for.
 Otherwise every instance would have to store that information, which includes not only the types used
-for the structure but the inner types as well, e.g. an array of generic arrays: Array!<Array!<Int>>...
+for the structure but the inner types as well, e.g. an array of generic arrays: Array$[Array$[Int]]...
 
 So when converting from an Any instance only the Any type is used for all the generic arguments:
 
@@ -475,16 +480,16 @@ So when converting from an Any instance only the Any type is used for all the ge
     let my_any: Any = a
 
     match my_any
-        case Array!<Int>
+        case Array$[Int]
             // error, will not compile!
         endcase
         case Array
             // now available iter function but as if declared as
-            // returning Iterator!<ArrayItem!<Any>>
+            // returning Iterator$[ArrayItem$[Any]]
             for item in my_any.iter()
-                let result = retain match item.value
+                let result = match item.value
                     case Int
-                        item.value > 1
+                        gt(item.value, 1)
                     endcase
                     else
                         false
@@ -493,6 +498,11 @@ So when converting from an Any instance only the Any type is used for all the ge
         endcase
     endmatch
 
+
+Match
+-----
+
+'match' keyword matches on enum, variant, type. Variant and type match reintroduce variable type.
 
 
 Plan
@@ -516,8 +526,8 @@ Plan
 - global const for primitive types and strings
 - generics
 - alias with generics
-- automatic generic types substitution based on code: let a = KVPair!<> {"a", 1}
-- automatic instance construction type: let a: Array!<KVPair!<>> = [{"a", 1}, {"b", 3}]
+- automatic generic types substitution based on code: let a = KVPair$[] {"a", 1}
+- automatic instance construction type: let a: Array$[KVPair$[]] = [{"a", 1}, {"b", 3}]
 - getters, setters, op_mut
 - _op_retain, _op_release, _op_free -- must be called when operated on Any instance as well.
 - _op_mut_field -- must be called when operated on Any instance, and via reflection.
