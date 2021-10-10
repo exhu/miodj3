@@ -427,9 +427,9 @@ Samples
 
     # multiple procs can have the same name but different type of the first arg
     @_builtin
-    cproc +(a: Int, b: Int): Int
+    cproc add(a: Int, b: Int): Int
     @_builtin
-    cproc +(a: Float, b: Float): Float
+    cproc add(a: Float, b: Float): Float
 
     @_builtin
     cproc and(a: Boolean, b: Boolean): Boolean
