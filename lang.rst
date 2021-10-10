@@ -301,6 +301,12 @@ Samples
         write
     endflags
 
+    # flags implicitly defines:
+    cproc Access::contains(self, f: Access): Boolean
+    cproc Access::union(self, other: Access): Access
+    cproc Access::intersection(self, other: Access): Access
+    cproc Access::diff(self, other: Access): Access
+
     # declare proc_addr type titled `Callback`
     pub proc_addr Callback(x: Int): Int
     # declare closure type name
