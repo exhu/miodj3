@@ -52,4 +52,8 @@ pub proc myproc2(a: Int, b: Int): Int
     k = w().k().n
     k().u = w().k().n
     g.d().e = w
+    h = retain a
+    e = aa::bb
+    e = cc
+    e = c(retain w, retain d)
 endproc

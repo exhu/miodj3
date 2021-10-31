@@ -525,6 +525,8 @@ e.g.
 Plan
 ----
 
+- cover grammar parsing
+
 - proc
 - call proc
 - cproc
@@ -552,6 +554,7 @@ Plan
 - reflection & introspection
 - proc_addr (needed only for optimization?)
 - _op_eq, deep_eq -- optional, do we really need it? 'is, ==' vs only '==' -- python vs java style?
+- math operators?
 
 Code generation and build process
 ---------------------------------
