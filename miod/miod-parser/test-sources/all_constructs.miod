@@ -20,3 +20,26 @@ const unit_name = "all_constructs"
 #hex literal test
 const hex_const = 0x1Dead_Beef
 const int_const = 1_000_000
+
+alias some_alias = int_const
+
+cproc myproc()
+
+## doc1
+## doc2
+pub cproc myproc(): Int
+
+@_build_tag {"aa"}
+pub cproc myproc(a: String, b: Int): Int
+
+proc myproc()
+endproc
+
+proc myproc2(): Int
+    3
+endproc
+
+pub proc myproc2(a: Int, b: Int): Int
+# TODO solve grammar ambiguity:
+    #sum(a,b)
+endproc

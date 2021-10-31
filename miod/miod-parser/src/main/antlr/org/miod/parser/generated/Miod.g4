@@ -53,14 +53,17 @@ enumValue: annotation* name=ID NEWLINE;
 
 flags: FLAGS name=ID NEWLINE enumValue END_FLAGS;
 
-cproc: CPROC name=namespacedId callableArgsAndReturn NEWLINE;
+cproc: CPROC procHeader;
 
-proc: PROC name=namespacedId callableArgsAndReturn NEWLINE procBody END_PROC;
+procHeader: name=namespacedId callableArgsAndReturn NEWLINE;
+
+proc: PROC procHeader procBody* END_PROC;
 
 procBody: comment
     | doc
     | annotation
     | statement
+    | emptyLine
     ;
 
 statement: expr NEWLINE
