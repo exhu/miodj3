@@ -1,1 +1,22 @@
 # TODO add all correct final language syntax elements here
+# comments line 2
+## documentation comment line 1
+## documentation comment line 2
+@_annotation
+@annot
+@_build_tag {"abc"}
+@rtti {false}
+unit all_constructs
+
+# test const
+@_build_tag { "float_math" }
+const pi_f: Float = 3.14
+
+pub const pi = 3.14
+
+#string literal test
+const unit_name = "all_constructs"
+
+#hex literal test
+const hex_const = 0x1Dead_Beef
+const int_const = 1_000_000

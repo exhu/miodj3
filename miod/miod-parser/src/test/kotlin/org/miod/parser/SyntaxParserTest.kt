@@ -9,7 +9,7 @@ import java.nio.file.Path
 import kotlin.test.*
 
 class SyntaxParserTest {
-    @Test fun UndefinedIdentifierErrorClassTest() {
+    @Test fun undefinedIdentifierErrorClassTest() {
         val ce = UndefinedIdentifier(Location(
             Path.of("a", "sub"), TextPosition(1,1),
             TextPosition(2,5)
@@ -52,5 +52,14 @@ class SyntaxParserTest {
         println(builder.errors.errors)
         assertIs<UnitRedeclaration>(builder.errors.errors[0])
         assertIs<UnitRedeclaration>(builder.errors.errors[1])
+    }
+
+    @Test fun allConstructsTest() {
+        val builder = AstBuilder(Path.of("test-sources", "all_constructs.miod"))
+        val parseResult = builder.parse()
+        println(builder.errors.errors)
+        assertTrue(parseResult)
+        assertTrue(builder.buildAst())
+        println(builder.errors.errors)
     }
 }

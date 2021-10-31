@@ -123,7 +123,7 @@ importUnit: IMPORT unitName=ID NEWLINE;
 // IMPORT_ALL imports unit public symbols into global namespace
 importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;
 
-constDecl: PUBLIC? CONST name=ID (COLON type=ID)? ASSIGN NEWLINE? literal NEWLINE;
+constDecl: CONST name=ID (COLON type=ID)? ASSIGN NEWLINE? literal NEWLINE;
 
 // annotations
 annotation: annotationWithData | annotationEmpty;

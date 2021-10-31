@@ -510,6 +510,17 @@ Match
 
 'match' keyword matches on enum, variant, type. Variant and type match reintroduce variable type.
 
+Procedure overload
+------------------
+
+There can be several procs with the same name, which differ in the type of the first argument.
+e.g.
+
+.. code-block::
+
+    proc add(a: Int, b: Int): Int
+    proc add(a: Float, b: Float): Float
+
 
 Plan
 ----
@@ -520,12 +531,13 @@ Plan
 - let, let mut
 - struct
 - retain, release, weak
+- string
+- const
 - annotations
 - match
 - enum
 - variant
 - closure
-- flags
 - for, while, if
 - alias support
 - imports
