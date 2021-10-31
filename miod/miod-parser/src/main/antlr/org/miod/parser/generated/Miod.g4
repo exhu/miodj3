@@ -66,39 +66,45 @@ procBody: comment
     | emptyLine
     ;
 
-statement: varDecl NEWLINE
-    | varAssign NEWLINE
-    | expr NEWLINE
+statement:
+    expr NEWLINE
+    | varDecl NEWLINE
     ;
 
 expr:
-    callExpr
-/*    | <assoc=right>expr assign
-    | <assoc=right>expr fieldAccess
+    recursiveReversed
     | retainExpr
-    */
-    | namespacedId
-    | literal
     | SELF
+    | literal
     ;
 
-fieldAccess: DOT ID;
+recursiveReversed:
+    namespacedId exprChain*
+    ;
 
-retainExpr: RETAIN expr;
+exprChain:
+    callOp
+    | fieldAccessOp
+    //| assign
+    ;
+
+callOp: OPEN_PAREN callArgs? CLOSE_PAREN;
+
+callArgs: expr (COMMA expr)*;
+
+fieldAccessOp: DOT ID;
+
+retainExpr: RETAIN ID;
 
 varDecl: LET MUT? name=ID assign;
 
 assign: ASSIGN NEWLINE? expr;
-
-varAssign: name=ID assign;
 
 newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit) CLOSE_CURLY;
 
 fieldsInit: fieldInit (COMMA fieldInit)*;
 fieldInit: ID COLON expr;
 
-callExpr: namespacedId OPEN_PAREN callArgs? CLOSE_PAREN;
-callArgs: expr (COMMA expr)*;
 
 procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair);
 
