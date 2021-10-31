@@ -44,9 +44,12 @@ pub proc myproc2(a: Int, b: Int): Int
     let a=3
     let mut b=4
     self
-    # TODO b = 7
+    b = 7
     let c = D::s.n
     let e = D::s()
     let e = D::s(a)(b)
     let e = D::s(a).d(b)(c).e.f()
+    k = w().k().n
+    k().u = w().k().n
+    g.d().e = w
 endproc

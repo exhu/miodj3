@@ -79,13 +79,12 @@ expr:
     ;
 
 recursiveReversed:
-    namespacedId exprChain*
+    namespacedId (assign | (exprChain* (fieldAccessOp assign)?))
     ;
 
 exprChain:
     callOp
     | fieldAccessOp
-    //| assign
     ;
 
 callOp: OPEN_PAREN callArgs? CLOSE_PAREN;
