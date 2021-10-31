@@ -99,7 +99,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         prediction: Int,
         configs: ATNConfigSet?
     ) {
-        errors.append(ParserError(zeroLocation(), "grammar context sensitivity"))
+        errors.append(ParserError(zeroLocation(), "grammar context sensitivity, ${recognizer?.context?.toInfoString(recognizer)}"))
     }
 
     private fun locationAt(line: Int, column: Int): Location {

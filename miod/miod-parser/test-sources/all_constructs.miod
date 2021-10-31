@@ -40,6 +40,5 @@ proc myproc2(): Int
 endproc
 
 pub proc myproc2(a: Int, b: Int): Int
-# TODO solve grammar ambiguity:
-    #sum(a,b)
+    sum(a,b)
 endproc

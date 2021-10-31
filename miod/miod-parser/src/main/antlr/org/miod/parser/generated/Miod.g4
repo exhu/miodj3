@@ -71,17 +71,19 @@ statement: expr NEWLINE
 
 atomExpr: literal
     | namespacedId
-    | varDecl
-    | varAssign
-    | newStruct
+//    | varDecl
+//    | varAssign
+//    | newStruct
     | SELF
     ;
 
-expr: retainExpr
+expr:
+    <assoc=right>expr callExpr
+/*    | <assoc=right>expr assign
+    | <assoc=right>expr fieldAccess
+    | retainExpr
+    */
     | atomExpr
-    | expr callExpr
-    | expr assign
-    | expr fieldAccess
     ;
 
 fieldAccess: DOT ID;
