@@ -41,4 +41,8 @@ endproc
 
 pub proc myproc2(a: Int, b: Int): Int
     sum(a,b)
+    let a=3
+    let mut b=4
+    self
+    b = 7
 endproc

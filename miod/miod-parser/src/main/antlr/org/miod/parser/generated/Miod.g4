@@ -66,24 +66,20 @@ procBody: comment
     | emptyLine
     ;
 
-statement: expr NEWLINE
-;
-
-atomExpr: literal
-    | namespacedId
-//    | varDecl
-//    | varAssign
-//    | newStruct
-    | SELF
+statement: varDecl NEWLINE
+    | varAssign NEWLINE
+    | expr NEWLINE
     ;
 
 expr:
-    <assoc=right>expr callExpr
+    callExpr
 /*    | <assoc=right>expr assign
     | <assoc=right>expr fieldAccess
     | retainExpr
     */
-    | atomExpr
+    | namespacedId
+    | literal
+    | SELF
     ;
 
 fieldAccess: DOT ID;
@@ -101,7 +97,7 @@ newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit) CLOSE_CURLY;
 fieldsInit: fieldInit (COMMA fieldInit)*;
 fieldInit: ID COLON expr;
 
-callExpr: OPEN_PAREN callArgs? CLOSE_PAREN;
+callExpr: namespacedId OPEN_PAREN callArgs? CLOSE_PAREN;
 callArgs: expr (COMMA expr)*;
 
 procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair);
