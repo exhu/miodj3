@@ -32,11 +32,25 @@ pub cproc myproc(): Int
 @_build_tag {"aa"}
 pub cproc myproc(a: String, b: Int): Int
 
+pub cproc proc_multiple_lines(a: String,
+    b: Int,
+    c: String): Int
+
+@with_fields { a: "aa",
+    b: true, c: 34 }
 proc myproc()
 endproc
 
 proc myproc2(): Int
     3
+endproc
+
+proc myprocln(a: Int,
+    b: Int,
+    c: Double): Int
+    3
+    sum(a(b(3,
+        4)))
 endproc
 
 pub proc myproc2(a: Int, b: Int): Int
@@ -48,12 +62,15 @@ pub proc myproc2(a: Int, b: Int): Int
     let c = D::s.n
     let e = D::s()
     let e = D::s(a)(b)
-    let e = D::s(a).d(b)(c).e.f()
+    let e = D::s(a).d(b)(c).
+        e.f()
     k = w().k().n
     k().u = w().k().n
     g.d().e = w
+    ## ignored docs
     h = retain a
     e = aa::bb
     e = cc
+    # comments
     e = c(retain w, retain d)
 endproc

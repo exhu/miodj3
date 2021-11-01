@@ -89,9 +89,9 @@ exprChain:
 
 callOp: OPEN_PAREN callArgs? CLOSE_PAREN;
 
-callArgs: expr (COMMA expr)*;
+callArgs: expr (COMMA NEWLINE? expr)*;
 
-fieldAccessOp: DOT ID;
+fieldAccessOp: DOT NEWLINE? ID;
 
 retainExpr: RETAIN ID;
 
@@ -105,7 +105,7 @@ fieldsInit: fieldInit (COMMA fieldInit)*;
 fieldInit: ID COLON expr;
 
 
-procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair);
+procArgsDecl: (SELF | idTypePair) (COMMA NEWLINE? idTypePair)*;
 
 idTypePair: name=ID COLON typeNameWithArgs;
 
