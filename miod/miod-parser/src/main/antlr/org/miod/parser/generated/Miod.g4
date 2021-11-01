@@ -73,6 +73,7 @@ statement:
 
 expr:
     recursiveReversed
+    | newStruct
     | retainExpr
     | SELF
     | literal
@@ -99,9 +100,9 @@ varDecl: LET MUT? name=ID assign;
 
 assign: ASSIGN NEWLINE? expr;
 
-newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit) CLOSE_CURLY;
+newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit)? CLOSE_CURLY;
 
-fieldsInit: fieldInit (COMMA fieldInit)*;
+fieldsInit: fieldInit (COMMA NEWLINE? fieldInit)*;
 fieldInit: ID COLON expr;
 
 

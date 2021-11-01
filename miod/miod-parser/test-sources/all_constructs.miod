@@ -74,3 +74,12 @@ pub proc myproc2(a: Int, b: Int): Int
     # comments
     e = c(retain w, retain d)
 endproc
+
+proc newstruct()
+    let a = Some {}
+    let b = SomeB { "abc" }
+    let b1 = SomeB1 { a }
+    let c = SomeC { a: "asd", b: true,
+        c: newstruct,
+        d: myproc2(3,4) }
+endproc
