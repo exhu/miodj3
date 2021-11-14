@@ -23,10 +23,10 @@ unit: UNIT name=ID NEWLINE;
 // moved unit body statements to separate rule
 // to trigger an error in the listener if those statements
 // are met before 'unit' declaration
-unitContents: PUBLIC? unitDeclarations;
+unitContents: importDecl
+    | PUBLIC? unitDeclarations;
 
-unitDeclarations: importDecl
-    | constDecl
+unitDeclarations: constDecl
     | alias
     | struct
     | closure
@@ -39,23 +39,23 @@ unitDeclarations: importDecl
 
 alias: ALIAS ID genericArgs? ASSIGN typeNameWithArgs NEWLINE;
 
-struct: STRUCT name=ID NEWLINE field* END_STRUCT NEWLINE;
+struct: STRUCT typeNameWithArgs NEWLINE (doc|comment|emptyLine|field)* END_STRUCT NEWLINE;
 
 callableArgsAndReturn: OPEN_PAREN procArgsDecl? CLOSE_PAREN (COLON typeNameWithArgs)?;
 
-closure: CLOSURE name=ID callableArgsAndReturn NEWLINE;
+closure: CLOSURE typeNameWithArgs callableArgsAndReturn NEWLINE;
 
-variant: VARIANT name=typeNameWithArgs NEWLINE variantName* END_VARIANT NEWLINE;
+variant: VARIANT name=typeNameWithArgs NEWLINE (comment | doc | emptyLine | variantName)* END_VARIANT NEWLINE;
 variantName: annotation* typeNameWithArgs NEWLINE;
 
-enumDecl: ENUM name=ID NEWLINE enumValue* END_ENUM;
+enumDecl: ENUM name=ID NEWLINE (comment | doc | emptyLine | enumValue)* END_ENUM;
 enumValue: annotation* name=ID NEWLINE;
 
-flags: FLAGS name=ID NEWLINE enumValue END_FLAGS;
+flags: FLAGS name=ID NEWLINE (comment | doc | emptyLine | enumValue)* END_FLAGS;
 
 cproc: CPROC procHeader;
 
-procHeader: name=namespacedId callableArgsAndReturn NEWLINE;
+procHeader: name=typeNameWithArgs callableArgsAndReturn NEWLINE;
 
 proc: PROC procHeader procBody* END_PROC;
 
@@ -115,7 +115,7 @@ setterOrGetter: COMMA NEWLINE? (SETTER|GETTER) name=ID;
 
 typeNameWithArgs: (WEAK | WEAK_MONITOR | SHARED)? namespacedId genericArgs?;
 
-genericArgs: typeArgsOpen typeNameWithArgs (COMMA NEWLINE? typeNameWithArgs)  typeArgsClose;
+genericArgs: typeArgsOpen typeNameWithArgs (COMMA NEWLINE? typeNameWithArgs)*  typeArgsClose;
 
 typeArgsOpen: TYPE_ARGS_OPEN;
 typeArgsClose: CLOSE_BRACKET;

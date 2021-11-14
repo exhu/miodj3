@@ -8,6 +8,20 @@
 @rtti {false}
 unit all_constructs
 
+# comment
+## doc
+import unita
+importall unitb
+
+alias a = b
+# comment
+## doc
+pub alias a$[a] = b$[a]
+alias a$[a] = b$[a,c]
+alias a$[a,b,c] = b$[a,c,d]
+alias a$[a,b,c] = b
+
+
 # test const
 @_build_tag { "float_math" }
 const pi_f: Float = 3.14
@@ -83,3 +97,84 @@ proc newstruct()
         c: newstruct,
         d: myproc2(3,4) }
 endproc
+
+pub struct MyEmptyStruct
+# comment
+## orphaned docs
+endstruct
+
+pub struct MyStruct
+    # comment
+    ## orphaned docs
+    @build
+    pub mut x: Int, setter set_x
+    pub mut x: Int, getter get_x
+    pub mut x: Int, getter get_x, setter set_x
+    pub mut x: Int, setter set_x, getter get_x
+
+    # ---
+    y: Int
+
+endstruct
+
+closure Abc()
+
+# comment
+
+closure Abc(a: Int)
+
+## doc
+@abc
+closure Abc(a: Int, b: Int)
+
+closure Abc(a: Int, b: Int): Int
+
+pub closure Abc$[A,B](a: A, b: Map$[A,B$[A]]): B$[A]
+
+pub struct MyStruct$[k,v]
+endstruct
+
+pub enum Days
+    # comment
+    Mon
+    ## doc
+    @build
+    Tue
+
+endenum
+
+pub variant Value
+    # aa
+    Days
+    ## ss
+    @abc
+    Int
+endvariant
+
+pub variant Value$[E]
+    # aa
+    Days
+    ## ss
+    @abc
+    Int
+    dd$[E]
+    E
+endvariant
+
+pub flags Attr
+    # asasd
+    ## sds
+    @aaa
+    Read
+    Write
+
+endflags
+
+@build
+proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
+endproc
+
+@build
+cproc AA::sum$[A](self, a: A, b:A$[Int]):Map$[weak A, weak_monitor Int]
+
+# TODO match, if, for, while, break, continue, closure expr
