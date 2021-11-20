@@ -32,7 +32,7 @@ unitDeclarations: constDecl
     | closure
     | variant
     | enumDecl
-    | flags
+    //| flags
     | cproc
     | proc
     ;
@@ -51,7 +51,7 @@ variantName: annotation* typeNameWithArgs NEWLINE;
 enumDecl: ENUM name=ID NEWLINE (comment | doc | emptyLine | enumValue)* END_ENUM;
 enumValue: annotation* name=ID NEWLINE;
 
-flags: FLAGS name=ID NEWLINE (comment | doc | emptyLine | enumValue)* END_FLAGS;
+//flags: FLAGS name=ID NEWLINE (comment | doc | emptyLine | enumValue)* END_FLAGS;
 
 cproc: CPROC procHeader;
 
@@ -227,8 +227,8 @@ BREAK: 'break';
 CONTINUE: 'continue';
 ENUM: 'enum';
 END_ENUM: 'endenum';
-FLAGS: 'flags';
-END_FLAGS: 'endflags';
+//FLAGS: 'flags';
+//END_FLAGS: 'endflags';
 SETTER: 'setter';
 GETTER: 'getter';
 // Map$[String, Integer] -- integer map generic type
