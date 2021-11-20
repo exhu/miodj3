@@ -172,9 +172,25 @@ endflags
 
 @build
 proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
+    for i in b
+        # aaa
+        call()
+    endfor
+
+    for i,v in b
+        # aaa
+        continue
+        call()
+    endfor
+
+    for i,v in b()
+        # aaa
+        call()
+        break
+    endfor
 endproc
 
 @build
-cproc AA::sum$[A](self, a: A, b:A$[Int]):Map$[weak A, weak_monitor Int]
+cproc AA::sum$[A](self, a: A, b:A$[Int]):shared Map$[shared A, shared Int]
 
-# TODO match, if, for, while, break, continue, closure expr
+# TODO match, if, while, closure expr

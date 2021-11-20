@@ -57,19 +57,21 @@ cproc: CPROC procHeader;
 
 procHeader: name=typeNameWithArgs callableArgsAndReturn NEWLINE;
 
-proc: PROC procHeader procBody* END_PROC;
-
-procBody: comment
-    | doc
-    | annotation
-    | statement
-    | emptyLine
-    ;
+proc: PROC procHeader statement* END_PROC;
 
 statement:
     expr NEWLINE
     | varDecl NEWLINE
+    | comment
+    | doc
+    | annotation
+    | emptyLine
+    | forLoop NEWLINE
+    | BREAK NEWLINE
+    | CONTINUE NEWLINE
     ;
+
+forLoop: FOR first=ID (COMMA second=ID)? IN expr NEWLINE statement* END_FOR;
 
 expr:
     recursiveReversed
@@ -113,7 +115,7 @@ idTypePair: name=ID COLON typeNameWithArgs;
 field: annotation* PUBLIC? MUT? idTypePair setterOrGetter* NEWLINE;
 setterOrGetter: COMMA NEWLINE? (SETTER|GETTER) name=ID;
 
-typeNameWithArgs: (WEAK | WEAK_MONITOR | SHARED)? namespacedId genericArgs?;
+typeNameWithArgs: SHARED? namespacedId genericArgs?;
 
 genericArgs: typeArgsOpen typeNameWithArgs (COMMA NEWLINE? typeNameWithArgs)*  typeArgsClose;
 
@@ -172,8 +174,8 @@ fragment NL: ('\r'? '\n');
 NEWLINE: NL;
 
 // comments
-DOC_COMMENT: '##' .*? NL;
-COMMENT: '#' .*? NL;
+DOC_COMMENT: '##' .*? (NL|EOF);
+COMMENT: '#' .*? (NL|EOF);
 
 //
 WS: (' ' | '\t')+ -> skip;
@@ -227,8 +229,6 @@ ENUM: 'enum';
 END_ENUM: 'endenum';
 FLAGS: 'flags';
 END_FLAGS: 'endflags';
-WEAK: 'weak';
-WEAK_MONITOR: 'weak_monitor';
 SETTER: 'setter';
 GETTER: 'getter';
 // Map$[String, Integer] -- integer map generic type
