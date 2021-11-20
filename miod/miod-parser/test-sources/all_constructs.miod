@@ -188,9 +188,32 @@ proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
         call()
         break
     endfor
+
+    while true
+        break
+    endwhile
+
+    if a then b
+    else c
+    endif
+
+    if a() then break
+        elif c() then continue
+        else k()
+        endif
+    if a then break
+    elif c() then continue
+    else if k() then
+        enclosed
+        else break
+        endif
+        endif
+
+    while true
+    endwhile
 endproc
 
 @build
 cproc AA::sum$[A](self, a: A, b:A$[Int]):shared Map$[shared A, shared Int]
 
-# TODO match, if, while, closure expr
+# TODO match, closure expr

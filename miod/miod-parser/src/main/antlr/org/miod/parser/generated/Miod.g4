@@ -69,7 +69,10 @@ statement:
     | forLoop NEWLINE
     | BREAK NEWLINE
     | CONTINUE NEWLINE
+    | whileLoop NEWLINE
     ;
+
+whileLoop: WHILE expr NEWLINE statement* END_WHILE;
 
 forLoop: FOR first=ID (COMMA second=ID)? IN expr NEWLINE statement* END_FOR;
 
@@ -79,7 +82,10 @@ expr:
     | retainExpr
     | SELF
     | literal
+    | ifExpr
     ;
+
+ifExpr: IF expr THEN statement+ (ELIF expr THEN statement+)* ELSE statement+ END_IF;
 
 recursiveReversed:
     namespacedId (assign | (exprChain* (fieldAccessOp assign)?))
