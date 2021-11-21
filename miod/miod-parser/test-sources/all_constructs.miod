@@ -241,6 +241,23 @@ proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
             D::d.e()
         endcase
     endmatch
+    let mut b = [1,2,3]
+    let mut b = [
+        1,
+        # asdad
+        ## cacad
+        2,3]
+    let c = [
+        1,
+        # asdad
+        ## cacad
+        2,
+        # asda
+        3,
+        ]
+    let d = [
+        1
+        ]
 endproc
 
 @build

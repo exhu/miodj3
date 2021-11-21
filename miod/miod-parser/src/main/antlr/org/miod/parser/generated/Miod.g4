@@ -85,7 +85,10 @@ expr:
     | ifExpr
     | closureExpr
     | matchExpr
+    | arrayExpr
     ;
+
+arrayExpr: OPEN_BRACKET (doc|comment)* NEWLINE? expr (COMMA NEWLINE? (comment|doc)* expr)* COMMA? NEWLINE? CLOSE_BRACKET;
 
 closureExpr: CLOSURE captureList? OPEN_PAREN procArgsDecl? CLOSE_PAREN statement* END_CLOSURE;
 
