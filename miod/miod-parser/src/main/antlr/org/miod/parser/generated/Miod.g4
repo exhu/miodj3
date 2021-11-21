@@ -83,7 +83,12 @@ expr:
     | SELF
     | literal
     | ifExpr
+    | closureExpr
     ;
+
+closureExpr: CLOSURE captureList? OPEN_PAREN procArgsDecl? CLOSE_PAREN statement* END_CLOSURE;
+
+captureList: OPEN_BRACKET RETAIN? ID (COMMA NEWLINE? RETAIN? ID)* CLOSE_BRACKET;
 
 ifExpr: IF expr THEN statement+ (ELIF expr THEN statement+)* ELSE statement+ END_IF;
 

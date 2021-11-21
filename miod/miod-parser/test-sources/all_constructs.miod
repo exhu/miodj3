@@ -210,10 +210,22 @@ proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
         endif
 
     while true
+        closure() endclosure
+        closure()
+            kk()
+        endclosure
+
+        let a = closure(x: Int, y: String)
+            sup(x,y)
+            endclosure
+
+        let a = closure[a, retain b](x: Int, y: String)
+            sup(a,b)
+            endclosure
     endwhile
 endproc
 
 @build
 cproc AA::sum$[A](self, a: A, b:A$[Int]):shared Map$[shared A, shared Int]
 
-# TODO match, closure expr
+# TODO match
