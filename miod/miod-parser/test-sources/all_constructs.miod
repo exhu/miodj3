@@ -223,9 +223,25 @@ proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]
             sup(a,b)
             endclosure
     endwhile
+
+    let m = match k()
+        case 3
+            "three"
+        endcase
+    endmatch
+    match abc::de.c
+        ## aaaa
+        case We
+            k()
+        endcase
+        # nn
+        ## aaa
+        # aaa
+        case De
+            D::d.e()
+        endcase
+    endmatch
 endproc
 
 @build
 cproc AA::sum$[A](self, a: A, b:A$[Int]):shared Map$[shared A, shared Int]
-
-# TODO match

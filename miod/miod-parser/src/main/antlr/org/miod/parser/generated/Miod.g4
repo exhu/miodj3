@@ -84,6 +84,7 @@ expr:
     | literal
     | ifExpr
     | closureExpr
+    | matchExpr
     ;
 
 closureExpr: CLOSURE captureList? OPEN_PAREN procArgsDecl? CLOSE_PAREN statement* END_CLOSURE;
@@ -91,6 +92,9 @@ closureExpr: CLOSURE captureList? OPEN_PAREN procArgsDecl? CLOSE_PAREN statement
 captureList: OPEN_BRACKET RETAIN? ID (COMMA NEWLINE? RETAIN? ID)* CLOSE_BRACKET;
 
 ifExpr: IF expr THEN statement+ (ELIF expr THEN statement+)* ELSE statement+ END_IF;
+
+matchExpr: MATCH expr NEWLINE matchCase+ END_MATCH;
+matchCase: (doc|comment)* CASE (namespacedId|literal) NEWLINE statement+ END_CASE NEWLINE;
 
 recursiveReversed:
     namespacedId (assign | (exprChain* (fieldAccessOp assign)?))
@@ -207,6 +211,8 @@ VARIANT: 'variant';
 END_VARIANT: 'endvariant';
 MATCH: 'match';
 END_MATCH: 'endmatch';
+CASE: 'case';
+END_CASE: 'endcase';
 IF: 'if';
 THEN: 'then';
 ELSE: 'else';
