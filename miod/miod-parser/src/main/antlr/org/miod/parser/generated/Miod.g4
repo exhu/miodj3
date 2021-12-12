@@ -145,7 +145,8 @@ namespacedId: root=ID (NAMESPACE_SEP subName=ID)*;
 importDecl: importUnit | importAllFromUnit;
 
 // IMPORT imports units, so that public symbols can be addressed as myunit.procName
-importUnit: IMPORT unitName=ID NEWLINE;
+importUnit: IMPORT unitName=ID (NAMESPACE_SEP (ID | symbolsList))? NEWLINE;
+symbolsList: OPEN_BRACKET NEWLINE? ID (COMMA NEWLINE? ID)* NEWLINE? CLOSE_BRACKET;
 
 // IMPORT_ALL imports unit public symbols into global namespace
 importAllFromUnit: IMPORT_ALL unitName=ID NEWLINE;

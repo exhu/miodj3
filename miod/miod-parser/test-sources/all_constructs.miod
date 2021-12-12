@@ -11,7 +11,13 @@ unit all_constructs
 # comment
 ## doc
 import unita
-importall unitb
+import unitb::[a,b,c]
+import unitk::[
+a,
+    b , c
+   ]
+import unitc::d
+importall abc
 
 alias a = b
 # comment
