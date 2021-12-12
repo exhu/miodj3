@@ -161,14 +161,14 @@ pub variant Value$[E]
     E
 endvariant
 
-#pub flags Attr
+pub flags Attr
     # asasd
     ## sds
-#    @aaa
-#    Read
-#    Write
+    @aaa
+    Read
+    Write
 
-#endflags
+endflags
 
 @build
 proc sum$[A](a: A, b:A$[Int]):Map$[A, Int]

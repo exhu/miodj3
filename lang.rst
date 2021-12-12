@@ -548,13 +548,15 @@ Plan
 - alias with generics
 - automatic generic types substitution based on code: let a = KVPair$[] {"a", 1}
 - automatic instance construction type: let a: Array$[KVPair$[]] = [{"a", 1}, {"b", 3}]
-- getters, setters, op_mut
-- _op_retain, _op_release, _op_free -- must be called when operated on Any instance as well.
+- _op_free -- must be called when operated on Any instance as well.
+- getters, setters, op_mut_field
 - _op_mut_field -- must be called when operated on Any instance, and via reflection.
 - reflection & introspection
+- flags
 - proc_addr (needed only for optimization?)
 - _op_eq, deep_eq -- optional, do we really need it? 'is, ==' vs only '==' -- python vs java style?
 - math operators?
+- _op_retain, _op_release, _op_free -- must be called when operated on Any instance as well.
 
 Code generation and build process
 ---------------------------------
