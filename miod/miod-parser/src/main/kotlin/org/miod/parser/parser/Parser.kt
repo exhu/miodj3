@@ -148,8 +148,9 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             compUnit = CompUnit(
                 location,
                 unitName,
-                null,
-                null,
+                arrayOf(),
+                arrayOf(),
+                arrayOf(),
                 arrayOf(),
                 arrayOf()
             )
