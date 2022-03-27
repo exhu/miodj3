@@ -60,7 +60,7 @@ class Import(
 
 abstract class GlobalStatement() : SourceElement()
 class Const(
-    val name: String, val value: LiteralValue
+    val name: String, val value: LiteralValue, val typeName: String
 ) : GlobalStatement()
 
 abstract class LiteralValue() : SourceElement()
