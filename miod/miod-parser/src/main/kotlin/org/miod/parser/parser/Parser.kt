@@ -146,7 +146,7 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
             // TODO grab and attach currently accumulated annotations and docs
             val unitName = ctx.name?.text ?: ""
             println("unitName=$unitName")
-            compUnit = CompUnit(unitName)
+            compUnit = CompUnit.create(unitName, location)
         }
     }
 

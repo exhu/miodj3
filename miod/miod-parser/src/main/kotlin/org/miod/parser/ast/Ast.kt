@@ -27,17 +27,31 @@ abstract class SourceElement()
 /// Eof or end of block, used for orphaned comments, docs etc. which do not have semantic element below.
 class EmptyAnchor() : SourceElement()
 
+val EMPTY_ANCHOR = EmptyAnchor()
+
 /// location marks unit name
-class CompUnit(
+class CompUnit private constructor(
     val name: String,
-    val imports: List<Import> = listOf(),
-    val globals: List<GlobalStatement> = listOf(),
-    val annotations: List<Annotation> = listOf(),
-    val docs: List<DocComment> = listOf(),
-    val comments: List<Comment> = listOf(),
-    val sourceLocations: Map<SourceElement, Location> = mapOf(),
-    val symbols: SymbolTable? = null
-) : SourceElement()
+    val imports: MutableList<Import> = mutableListOf(),
+    val globals: MutableList<GlobalStatement> = mutableListOf(),
+    val annotations: MutableList<Annotation> = mutableListOf(),
+    val docs: MutableList<DocComment> = mutableListOf(),
+    val comments: MutableList<Comment> = mutableListOf(),
+    val sourceLocations: MutableMap<SourceElement, Location> = mutableMapOf(),
+    var symbolTables: MutableMap<Symbol, SymbolTable> = mutableMapOf()
+) : SourceElement() {
+    companion object {
+        fun create(name: String, location: Location): CompUnit {
+            val unit = CompUnit(name)
+            unit.sourceLocations[unit] = location
+            val sym = UnitDefinitionSymbol(unit)
+            val symTable = SymbolTable()
+            symTable.symbols[name] = sym
+            unit.symbolTables[sym] = symTable
+            return unit
+        }
+    }
+}
 
 /// location marks unit name
 class Import(
@@ -75,15 +89,12 @@ class UnitImportedSymbol(val importNode: Import, val importedSymbol: Symbol) :
 class ConstSymbol(val constNode: Const) : Symbol(constNode.name, constNode)
 
 /// Symbol table per unit/proc/block
-class SymbolTable(
-    name: String,
-    node: SourceElement,
-    val parent: SymbolTable?,
-    val symbols: Map<String, Symbol>,
-): Symbol(name, node) {
+class SymbolTable(val parent: SymbolTable? = null,
+    val symbols: MutableMap<String, Symbol> = mutableMapOf(),
+) {
     fun resolve(name: String): Symbol? {
         // TODO split by namespace separator
-        // if root matches symbol.name or matches in symbols, go deeper
+        // if root matches in Symbols, resolve
         // else parent.resolve(name)
 
         return null;
