@@ -138,22 +138,15 @@ class AstBuilder(val filePath: Path) : MiodBaseListener(), ANTLRErrorListener {
         if (ctx != null) {
             val location = locationFillToken(ctx.name)
             if (compUnit != null) {
-                errors.append(UnitRedeclaration(location, compUnit!!.location))
+                var firstLocation:Location? = compUnit!!.sourceLocations.get(compUnit as SourceElement)
+                errors.append(UnitRedeclaration(location, if (firstLocation != null) firstLocation else EMPTY_LOCATION))
                 return
             }
 
             // TODO grab and attach currently accumulated annotations and docs
             val unitName = ctx.name?.text ?: ""
             println("unitName=$unitName")
-            compUnit = CompUnit(
-                location,
-                unitName,
-                arrayOf(),
-                arrayOf(),
-                arrayOf(),
-                arrayOf(),
-                arrayOf()
-            )
+            compUnit = CompUnit(unitName)
         }
     }
 

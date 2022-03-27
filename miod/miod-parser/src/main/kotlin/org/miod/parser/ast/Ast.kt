@@ -20,59 +20,72 @@ class Location(val path: Path, val start: TextPosition, val end: TextPosition) {
     }
 }
 
-abstract class SourceElement(val location: Location)
+val EMPTY_LOCATION = Location(Path.of(""), TextPosition(0,0), TextPosition(0,0))
+
+abstract class SourceElement()
 
 /// Eof or end of block, used for orphaned comments, docs etc. which do not have semantic element below.
-class EmptyAnchor(location: Location) : SourceElement(location)
+class EmptyAnchor() : SourceElement()
 
 /// location marks unit name
 class CompUnit(
-    location: Location,
     val name: String,
-    val imports: Array<Import>,
-    val globals: Array<GlobalStatement>,
-    val annotations: Array<Annotation>,
-    val docs: Array<DocComment>,
-    val comments: Array<Comment>
-) : SourceElement(location)
+    val imports: List<Import> = listOf(),
+    val globals: List<GlobalStatement> = listOf(),
+    val annotations: List<Annotation> = listOf(),
+    val docs: List<DocComment> = listOf(),
+    val comments: List<Comment> = listOf(),
+    val sourceLocations: Map<SourceElement, Location> = mapOf(),
+    val symbols: SymbolTable? = null
+) : SourceElement()
 
 /// location marks unit name
 class Import(
-    location: Location, val name: String, val all: Boolean
-) : SourceElement(location)
+    val name: String, val all: Boolean
+) : SourceElement()
 
-abstract class GlobalStatement(location: Location) : SourceElement(location)
+abstract class GlobalStatement() : SourceElement()
 class Const(
-    location: Location, val name: String, val value: LiteralValue
-) : GlobalStatement(location)
+    val name: String, val value: LiteralValue
+) : GlobalStatement()
 
-abstract class LiteralValue(location: Location) : SourceElement(location)
-class LiteralIntegerValue(location: Location, val value: Long) : LiteralValue(location)
-class LiteralBooleanValue(location: Location, val value: Boolean) : LiteralValue(location)
-class LiteralFloatValue(location: Location, val value: Double) : LiteralValue(location)
-class LiteralStringValue(location: Location, val value: String) : LiteralValue(location)
-class LiteralStringFromIdValue(location: Location, val value: String) : LiteralValue(location)
+abstract class LiteralValue() : SourceElement()
+class LiteralIntegerValue(val value: Long) : LiteralValue()
+class LiteralBooleanValue(val value: Boolean) : LiteralValue()
+class LiteralFloatValue(val value: Double) : LiteralValue()
+class LiteralStringValue(val value: String) : LiteralValue()
+class LiteralStringFromIdValue(val value: String) : LiteralValue()
 
-class Annotation(location: Location, anchor: SourceElement, val name: String, val values: Map<String, LiteralValue>) :
-    SourceElement(location)
+class Annotation(anchor: SourceElement, val name: String, val values: Map<String, LiteralValue>) :
+    SourceElement()
 
-class Comment(location: Location, val anchor: SourceElement, val text: String) : SourceElement(location)
-class DocComment(location: Location, val anchor: SourceElement, val text: String) : SourceElement(location)
+class Comment(val anchor: SourceElement, val text: String) : SourceElement()
+class DocComment(val anchor: SourceElement, val text: String) : SourceElement()
 
 /// semantic
-abstract class Symbol(val location: Location, val name: String)
-class UnitDefinitionSymbol(val unitNode: CompUnit) : Symbol(unitNode.location, unitNode.name)
+abstract class Symbol(val name: String, val node: SourceElement)
+class UnitDefinitionSymbol(val unitNode: CompUnit) : Symbol(unitNode.name, unitNode)
 class UnitImportSymbol(val importNode: Import, val importedSymbol: UnitDefinitionSymbol) :
-    Symbol(importNode.location, importNode.name)
+    Symbol(importNode.name, importNode)
 
 // for each public symbol imported through "importall"
 class UnitImportedSymbol(val importNode: Import, val importedSymbol: Symbol) :
-    Symbol(importNode.location, importedSymbol.name)
+    Symbol(importedSymbol.name, importNode)
 
-class ConstSymbol(val constNode: Const) : Symbol(constNode.location, constNode.name)
+class ConstSymbol(val constNode: Const) : Symbol(constNode.name, constNode)
 
-// contextLocation marks start of proc till the end, or case/for etc. blocks
+/// Symbol table per unit/proc/block
 class SymbolTable(
-    val contextLocation: Location, val parent: SymbolTable,
-    val symbols: Map<String, Symbol>
-)
+    name: String,
+    node: SourceElement,
+    val parent: SymbolTable?,
+    val symbols: Map<String, Symbol>,
+): Symbol(name, node) {
+    fun resolve(name: String): Symbol? {
+        // TODO split by namespace separator
+        // if root matches symbol.name or matches in symbols, go deeper
+        // else parent.resolve(name)
+
+        return null;
+    }
+}
