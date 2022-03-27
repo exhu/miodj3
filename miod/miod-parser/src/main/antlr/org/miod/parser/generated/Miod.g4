@@ -96,11 +96,12 @@ captureList: OPEN_BRACKET RETAIN? ID (COMMA NEWLINE? RETAIN? ID)* CLOSE_BRACKET;
 
 ifExpr: IF expr THEN statement+ (ELIF expr THEN statement+)* ELSE statement+ END_IF;
 
-matchExpr: MATCH expr NEWLINE matchCase+ END_MATCH;
+matchExpr: MATCH expr NEWLINE matchCase+ matchElse? END_MATCH;
 matchCase: (doc|comment)* CASE (namespacedId|literal) NEWLINE statement+ END_CASE NEWLINE;
+matchElse: ELSE statement+;
 
 recursiveReversed:
-    namespacedId (assign | (exprChain* (fieldAccessOp assign)?))
+    (namespacedId|SELF) (assign | (exprChain* (fieldAccessOp assign)?))
     ;
 
 exprChain:
@@ -120,9 +121,9 @@ varDecl: LET MUT? name=ID assign;
 
 assign: ASSIGN NEWLINE? expr;
 
-newStruct: typeNameWithArgs OPEN_CURLY (expr | fieldsInit)? CLOSE_CURLY;
+newStruct: typeNameWithArgs OPEN_CURLY NEWLINE? (expr | fieldsInit)? CLOSE_CURLY;
 
-fieldsInit: fieldInit (COMMA NEWLINE? fieldInit)*;
+fieldsInit: fieldInit (COMMA NEWLINE? fieldInit)* NEWLINE?;
 fieldInit: ID COLON expr;
 
 

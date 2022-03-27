@@ -273,19 +273,19 @@ pub struct Vector
 endstruct
 
 variant Optional
-    None,
+    None
     Any
 endvariant
 
 pub struct VectorIterator
-    next: closure(): Optional
-    has_next: closure(): Bool
+    next: NextProc
+    has_next: HasNextProc
 endstruct
 
 proc Vector::iter(self): VectorIterator
+    let data = self.data
     VectorIterator {
-        next: closure[self.data]()
-        endclosure
+        next: closure[data]() endclosure
     }
 endproc
 
@@ -294,8 +294,8 @@ pub struct IntVector
 endstruct
 
 pub struct IntVectorIterator
-    next: closure(): Optional
-    has_next: closure(): Bool
+    next: NextProc
+    has_next: HasNextProc
 endstruct
 
 

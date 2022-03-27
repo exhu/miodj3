@@ -1,4 +1,4 @@
-package org.miod.parser.parser
+package org.miod.parser.ast
 
 import org.miod.parser.ast.CompUnit
 import java.nio.file.Path

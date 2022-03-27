@@ -1,4 +1,4 @@
-package org.miod.parser.parser
+package org.miod.parser.ast
 
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.ATNConfigSet
