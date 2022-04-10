@@ -76,11 +76,16 @@ whileLoop: WHILE expr NEWLINE statement* END_WHILE;
 
 forLoop: FOR first=ID (COMMA second=ID)? IN expr NEWLINE statement* END_FOR;
 
-expr:
-    recursiveReversed
+expr: expr ASSIGN NEWLINE? expr # ExprAssign
+    | expr OPEN_PAREN (expr (COMMA NEWLINE? expr)*)? CLOSE_PAREN # ExprCall
+    | expr DOT NEWLINE? memberName=ID # ExprMember
+    | subexprAtom # ExprAtom
+    ;
+
+subexprAtom: namespacedId
+    | SELF
     | newStruct
     | retainExpr
-    | SELF
     | literal
     | ifExpr
     | closureExpr
@@ -100,20 +105,7 @@ matchExpr: MATCH expr NEWLINE matchCase+ matchElse? END_MATCH;
 matchCase: (doc|comment)* CASE (namespacedId|literal) NEWLINE statement+ END_CASE NEWLINE;
 matchElse: ELSE statement+;
 
-recursiveReversed:
-    (namespacedId|SELF) (assign | (exprChain* (fieldAccessOp assign)?))
-    ;
-
-exprChain:
-    callOp
-    | fieldAccessOp
-    ;
-
-callOp: OPEN_PAREN callArgs? CLOSE_PAREN;
-
 callArgs: expr (COMMA NEWLINE? expr)*;
-
-fieldAccessOp: DOT NEWLINE? ID;
 
 retainExpr: RETAIN ID;
 
