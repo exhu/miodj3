@@ -1,5 +1,6 @@
 Introduction
 ------------
+Kotlin/Java/Jvm workflow turned out to be too slow, no fun to keep developing. So this repo is archived.
 
 MIT license.
 
